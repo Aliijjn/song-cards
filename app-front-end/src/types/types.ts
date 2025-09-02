@@ -1,24 +1,25 @@
-export type SongData = {
-  title:                  string;
-  artist:                 string;
-  album:                  string;
-  song_duration:          number;
-  release_date:           number;
-  total_views_on_spotify: number;
+export type SongDTO = {
+  name:             string;
+  artist_name:      string;
+  album_name:       string;
+  album_name_clean: string;
+  duration_seconds: number;
+  release_date:     string;
+  views_on_spotify: number;
 }
 
-export type GuessableStatKey = 'song_duration' | 'release_date' | 'total_views_on_spotify';
-
-export const guessableStatKeys: GuessableStatKey[] = [
-  'song_duration',
+export const guessableStatKeys = [
+  'duration_seconds',
   'release_date',
-  'total_views_on_spotify',
-];
+  'views_on_spotify',
+] as const;
+
+export type GuessableStatKey = typeof guessableStatKeys[number];
 
 type buttonState = 'default' | 'correct' | 'incorrect'
 
 export type ButtonData = {
-  song:     SongData;
+  song:     SongDTO;
   songStat: GuessableStatKey;
   index:    number;
   state:    buttonState;

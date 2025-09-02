@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import ChoiceButton from './ChoiceButton.vue';
 import {
-  type SongData,
+  type SongDTO,
   type GuessableStatKey,
   guessableStatKeys,
   type ButtonData,
@@ -17,15 +17,15 @@ const gameData = ref<GameData>({
   score: 0,
   selectedButton: null
 })
-const songs = ref<SongData[]>([]);
+const songs = ref<SongDTO[]>([]);
 const loading = ref<boolean>(true)
 const button1 = ref<ButtonData | null>(null)
 const button2 = ref<ButtonData | null>(null)
 
 const questions: Record<GuessableStatKey, string> = {
-  song_duration: "Which song is <strong>longer</strong>?",
-  release_date: "Which song is <strong>newer</strong>?",
-  total_views_on_spotify: "Which song has the <strong>most streams</strong> on Spotify?",
+  duration_seconds: "Which song is <strong>longer</strong>?",
+  release_date:     "Which song is <strong>newer</strong>?",
+  views_on_spotify: "Which song has the <strong>most streams</strong> on Spotify?",
 } 
 
 function setButtons() {
@@ -63,7 +63,7 @@ function clickButton(selectedButton: number | undefined) {
 
   const selectedSong = selectedButton === 0 ? b1 : b2
   const selectedValue = selectedSong.song[selectedSong.songStat]
-  const highestValue = Math.max(b1.song[b1.songStat], b2.song[b2.songStat])
+  const highestValue = (b1.song[b1.songStat] > b2.song[b2.songStat] ? b1.song[b1.songStat] : b2.song[b2.songStat])
   if (selectedValue === highestValue) {
     gameData.value.score++
     button1.value.state = 'correct'
@@ -83,7 +83,7 @@ function clickButton(selectedButton: number | undefined) {
 }
 
 async function fetchData() {
-  const response = await fetch('http://localhost:8080/api/songs')
+  const response = await fetch('https://127.0.0.1:8001/api/songs')
   if (response.ok) {
     songs.value = await response.json()
   }

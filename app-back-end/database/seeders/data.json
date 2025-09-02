@@ -1,0 +1,36 @@
+{
+    "artists": [
+        { "name": "Pink Floyd" },
+        { "name": "Led Zeppelin" },
+        { "name": "Yes" },
+        { "name": "Cream" },
+        { "name": "King Crimson" },
+        { "name": "The Beatles" },
+        { "name": "Emerson, Lake & Palmer" },
+        { "name": "The Doors" }
+    ],
+    "albums": [
+        { "name": "The Wall",                         "release_date": "1979-11-30", "artist_name": "Pink Floyd" },
+        { "name": "Led Zeppelin IV",                  "release_date": "1971-11-08", "artist_name": "Led Zeppelin" },
+        { "name": "Fragile",                          "release_date": "1971-11-12", "artist_name": "Yes" },
+        { "name": "Dark Side of the Moon",            "release_date": "1973-03-01", "artist_name": "Pink Floyd" },
+        { "name": "Wheels of Fire",                   "release_date": "1968-06-14", "artist_name": "Cream" },
+        { "name": "In the Court of the Crimson King", "release_date": "1969-10-10", "artist_name": "King Crimson" },
+        { "name": "Meddle",                           "release_date": "1971-11-30", "artist_name": "Pink Floyd" },
+        { "name": "Rubber Soul",                      "release_date": "1965-12-03", "artist_name": "The Beatles" },
+        { "name": "Emerson, Lake & Palmer",           "release_date": "1970-10-01", "artist_name": "Emerson, Lake & Palmer" },
+        { "name": "The Doors",                        "release_date": "1967-01-04", "artist_name": "The Doors" }
+    ],
+    "songs": [
+        { "name": "Comfortably Numb",                 "duration_seconds": 384,  "views_on_spotify":  732000000, "album_name": "The Wall" },
+        { "name": "Stairway to Heaven",               "duration_seconds": 482,  "views_on_spotify": 1150000000, "album_name": "Led Zeppelin IV" },
+        { "name": "Roundabout",                       "duration_seconds": 513,  "views_on_spotify":  150000000, "album_name": "Fragile" },
+        { "name": "Time",                             "duration_seconds": 413,  "views_on_spotify":  440000000, "album_name": "Dark Side of the Moon" },
+        { "name": "White Room",                       "duration_seconds": 298,  "views_on_spotify":  338000000, "album_name": "Wheels of Fire" },
+        { "name": "In the Court of the Crimson King", "duration_seconds": 605,  "views_on_spotify":   22000000, "album_name": "In the Court of the Crimson King" },
+        { "name": "Echoes",                           "duration_seconds": 1412, "views_on_spotify":   70000000, "album_name": "Meddle" },
+        { "name": "In My Life",                       "duration_seconds": 146,  "views_on_spotify":  541000000, "album_name": "Rubber Soul" },
+        { "name": "Lucky Man",                        "duration_seconds": 277,  "views_on_spotify":   50000000, "album_name": "Emerson, Lake & Palmer" },
+        { "name": "The End",                          "duration_seconds": 703,  "views_on_spotify":  144000000, "album_name": "The Doors" }
+    ]
+}

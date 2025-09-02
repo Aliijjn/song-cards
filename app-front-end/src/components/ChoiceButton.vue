@@ -32,20 +32,16 @@ function getColour() {
 const parseSongStat = computed((): string[] => {
   const val = button.value?.song[button.value.songStat] as number
   switch (button.value?.songStat) {
-    case 'song_duration':          return ["Duration: ",     `${Math.floor(val / 60)}:${(val % 60).toString().padStart(2, "0")}`]
+    case 'duration_seconds':       return ["Duration: ",     `${Math.floor(val / 60)}:${(val % 60).toString().padStart(2, "0")}`]
     case 'release_date':           return ["Release Year: ", `${val}`]
-    case 'total_views_on_spotify': return ["Streams: ",      `${val}m`]
+    case 'views_on_spotify':       return ["Streams: ",      `${val}m`]
     default:                       return [":(",             "this shouldn't happen"]
   }
 })
 
 const albumCoverUrl = computed((): string => {
   return `http://localhost:8080/api/album-cover/${
-    button.value?.song.album
-      .replace(/[,&@!#%$^*()_+=]/g, '')
-      .trim()
-      .replace(/\s+/g, '-')
-      .toLowerCase()
+    button.value?.song.album_name_clean
   }`
 })
 
@@ -61,8 +57,8 @@ const albumCoverUrl = computed((): string => {
       :loading="button === null"
       :disabled="button?.state !== 'default'"
     >
-      <v-card-title v-text="button?.song.title" />
-      <v-card-subtitle class="mt-n2" v-text="button?.song.artist" />
+      <v-card-title v-text="button?.song.name" />
+      <v-card-subtitle class="mt-n2" v-text="button?.song.artist_name" />
 
       <v-img
         :src="albumCoverUrl"

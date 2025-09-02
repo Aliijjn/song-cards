@@ -20,6 +20,7 @@ type Song struct {
 }
 
 func getSongData(w http.ResponseWriter, r *http.Request) {
+	log.Fatal("hiii")
 	data, err := os.ReadFile("songs.json")
 	if err != nil {
 		log.Fatal(err)
@@ -61,7 +62,7 @@ func withCORS(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-	http.HandleFunc("/api/songs", withCORS(getSongData));
+	http.HandleFunc("/api/songs/", withCORS(getSongData));
 	http.HandleFunc("/api/album-cover/", withCORS(getAlbumCover));
 
 	// http.HandleFunc("/api/images", withCORS(func(w http.ResponseWriter, r *http.Request) {
