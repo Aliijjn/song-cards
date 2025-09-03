@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dayjs": "^1.11.18",
     "nvm": "^0.0.4",
     "vue": "^3.5.17"
   },

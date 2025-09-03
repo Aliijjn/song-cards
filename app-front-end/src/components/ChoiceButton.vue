@@ -10,6 +10,7 @@ import {
   type GameState,
   type SessionData,
 } from '../types/types';
+import dayjs from 'dayjs';
 
 const props = defineProps<{
   button: ButtonData | null
@@ -17,30 +18,47 @@ const props = defineProps<{
 const button = toRef(props, 'button')
 
 const loading = ref(true);
-const image = ref(null);
 
 const emit = defineEmits(['click'])
 
-function getColour() {
-  switch (button.value?.state) {
-    case 'correct':   return 'correct'
-    case 'incorrect': return 'incorrect'
-    default:          return 'primary'
+function formatStreams(value: number): string {
+  const len = value.toString().length - 1;
+  const postfixes: { len: number, char: string }[] = [
+    { len: 9, char: 'B' },
+    { len: 6, char: 'M' },
+    { len: 3, char: 'K' },
+  ]
+  const postfix = postfixes.find((p) => p.len <= len)?.char ?? "";
+  let precision = 0;
+
+  if (len >= 12) {
+    value /= 10 ** 9;
+  } else if (len >= 3) {
+    value /= (10 ** (len - len % 3));
+    precision = 2 - len % 3;
   }
+  return (value).toFixed(precision) + postfix;
 }
 
 const parseSongStat = computed((): string[] => {
-  const val = button.value?.song[button.value.songStat] as number
+  let val = button.value?.song[button.value.songStat]
   switch (button.value?.songStat) {
-    case 'duration_seconds':       return ["Duration: ",     `${Math.floor(val / 60)}:${(val % 60).toString().padStart(2, "0")}`]
-    case 'release_date':           return ["Release Year: ", `${val}`]
-    case 'views_on_spotify':       return ["Streams: ",      `${val}m`]
-    default:                       return [":(",             "this shouldn't happen"]
+    case 'duration_seconds':
+      val = val as number;
+      return ["Duration: ", `${Math.floor(val / 60)}:${(val % 60).toString().padStart(2, "0")}`]
+    case 'release_date':
+      val = val as string;
+      return ["Release Year: ", dayjs(val).format("MMM DDD YYYY")];
+    case 'views_on_spotify':
+      val = val as number;
+      return ["Streams: ", formatStreams(val)]
+    default:
+      return [":(", "this shouldn't happen"]
   }
 })
 
 const albumCoverUrl = computed((): string => {
-  return `http://localhost:8080/api/album-cover/${
+  return `https://localhost:8001/storage/${
     button.value?.song.album_name_clean
   }`
 })

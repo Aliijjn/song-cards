@@ -10,7 +10,8 @@ class SongController extends Controller
 {
     public function getSongs(): JsonResponse
     {
-        ray("test");
-        return new JsonResponse(SongDTO::collect(Song::with(['artist', 'album'])->get()));
+        return new JsonResponse(
+            SongDTO::collect(Song::with(['artist', 'album'])->get())
+        );
     }
 }

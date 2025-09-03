@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use App\Models\Song;
+use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 use Carbon\CarbonImmutable;
 class SongDTO extends Data
@@ -19,11 +20,14 @@ class SongDTO extends Data
 
     public static function fromModel(Song $song): self
     {
+        ray(Storage::disk('public')->exists($song->album->name_clean.'.png'), $song->album->name_clean.'.png');
         return new self(
             $song->name,
             $song->artist->name,
             $song->album->name,
-            $song->album->name_clean,
+            Storage::disk('public')->exists($song->album->name_clean.'.png')
+                ? $song->album->name_clean.'.png'
+                : 'default.png',
             $song->duration_seconds,
             $song->views_on_spotify,
             $song->album->release_date,
