@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Album;
 use App\Models\Artist;
+use http\Exception\InvalidArgumentException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,11 @@ class MusicSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            DB::table('albums')->delete();
+            DB::table('artists')->delete();
+            DB::table('genres')->delete();
+            DB::table('genre_song')->delete();
+            DB::table('songs')->delete();
 
             $file = File::get(database_path("seeders/data.json"));
             $data = json_decode($file, true);
@@ -35,44 +41,77 @@ class MusicSeeder extends Seeder
 
             $artists = $data['artists'];
             foreach ($artists as $artist) {
-                DB::table('artists')->insert([
-                    'name' => $artist['name'],
-                    'created_at' => $now,
-                ]);
+                try {
+                    DB::table('artists')->insert([
+                        'name' => $artist['name'],
+                        'created_at' => $now,
+                    ]);
+                } catch (\Exception $e) {
+                    throw new \Exception(
+                        "Invalid data for artist:\n".json_encode($artist)."\nError:\n".$e->getMessage()
+                    );
+                }
             }
 
             $albums = $data['albums'];
             foreach ($albums as $album) {
-                $artist_id = Artist::query()
-                    ->where('name', $album['artist_name'])
-                    ->firstOrFail()
-                    ->id;
+                try {
+                    $artist_id = Artist::query()
+                        ->where('name', $album['artist_name'])
+                        ->firstOrFail()
+                        ->id;
 
-                DB::table('albums')->insert([
-                    'name' => $album['name'],
-                    'name_clean' => $this->name_clean($album['name']),
-                    'release_date' => $album['release_date'],
-                    'artist_id' => $artist_id,
-                    'created_at' => $now,
-                ]);
+                    DB::table('albums')->insert([
+                        'name' => $album['name'],
+                        'name_clean' => $this->name_clean($album['name']),
+                        'release_date' => $album['release_date'],
+                        'artist_id' => $artist_id,
+                        'created_at' => $now,
+                    ]);
+                } catch (\Exception $e) {
+                    throw new \Exception(
+                        "Invalid data for album:\n".json_encode($album)."\nError:\n".$e->getMessage()
+                    );
+                }
+            }
+
+            $genres = $data['genres'];
+            foreach ($genres as $genre) {
+                try {
+                    DB::table('genres')->insert([
+                        'name' => $genre['name'],
+                        'description' => $genre['description'],
+                        'created_at' => $now,
+                    ]);
+                } catch (\Exception $e) {
+                    throw new \Exception(
+                        "Invalid data for genre:\n".json_encode($genre)."\nError:\n".$e->getMessage()
+                    );
+                }
             }
 
             $songs = $data['songs'];
             foreach ($songs as $song) {
-                $album = Album::query()
-                    ->where('name', $song['album_name'])
-                    ->firstOrFail();
-                $album_id = $album->id;
-                $artist_id = $album->artist->id;
+                try {
+                    $album = Album::query()
+                        ->where('name', $song['album_name'])
+                        ->firstOrFail();
+                    $album_id = $album->id;
+                    $artist_id = $album->artist->id;
 
-                DB::table('songs')->insert([
-                    'name' => $song['name'],
-                    'duration_seconds' => $song['duration_seconds'],
-                    'views_on_spotify' => $song['views_on_spotify'],
-                    'album_id' => $album_id,
-                    'artist_id' => $artist_id,
-                    'created_at' => $now,
-                ]);
+                    DB::table('songs')->insert([
+                        'name' => $song['name'],
+                        'duration_seconds' => $song['duration_seconds'],
+                        'views_on_spotify' => $song['views_on_spotify'],
+                        'album_id' => $album_id,
+                        'artist_id' => $artist_id,
+                        'created_at' => $now,
+                    ]);
+                } catch (\Exception $e) {
+                    throw new \Exception(
+                        "Invalid data for song:\n".json_encode($song)."\nError:\n".$e->getMessage()
+                    );
+                }
             }
 
         });

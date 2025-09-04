@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['api'])
     ->group(function () {
 
+        Route::get('/genres', [songController::class, 'getGenres']);
         Route::get('/songs', [SongController::class, 'getSongs']);
 
     });

@@ -48,7 +48,7 @@ const parseSongStat = computed((): string[] => {
       return ["Duration: ", `${Math.floor(val / 60)}:${(val % 60).toString().padStart(2, "0")}`]
     case 'release_date':
       val = val as string;
-      return ["Release Year: ", dayjs(val).format("MMM DDD YYYY")];
+      return ["Release Date: ", dayjs(val).format("MMM D YYYY")];
     case 'views_on_spotify':
       val = val as number;
       return ["Streams: ", formatStreams(val)]

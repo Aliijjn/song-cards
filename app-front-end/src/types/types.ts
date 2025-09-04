@@ -37,3 +37,9 @@ export type SessionData = {
   prevScore: number;
   highScore: number;
 }
+
+export type GenreDO = {
+  id: number;
+  name: string;
+  description: string;
+}

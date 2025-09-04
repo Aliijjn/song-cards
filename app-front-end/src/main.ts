@@ -1,6 +1,7 @@
 // src/main.ts
 import { createApp } from 'vue'
 import App from './App.vue'
+import { createPinia } from 'pinia'
 import { createVuetify } from 'vuetify'
 import 'vuetify/styles' // Global CSS
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
@@ -53,4 +54,5 @@ const vuetify = createVuetify({
 
 createApp(App)
   .use(vuetify)
+  .use(createPinia())
   .mount('#app')

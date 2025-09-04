@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Song extends Model
 {
-    /** @use HasFactory<\Database\Factories\SongFactory> */
-    use HasFactory;
-
     protected $guarded = ['id'];
 
     public function album(): BelongsTo
@@ -21,5 +19,10 @@ class Song extends Model
     public function artist(): BelongsTo
     {
         return $this->BelongsTo(Artist::class);
+    }
+
+    public function genres(): BelongsToMany
+    {
+        return $this->belongsToMany(Genre::class);
     }
 }
