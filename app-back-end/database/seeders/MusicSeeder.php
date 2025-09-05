@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enum\GenreTypeEnum;
 use App\Models\Album;
 use App\Models\Artist;
+use Carbon\CarbonImmutable;
 use http\Exception\InvalidArgumentException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -29,10 +31,10 @@ class MusicSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            DB::table('genre_song')->delete();
+            DB::table('genres')->delete();
             DB::table('albums')->delete();
             DB::table('artists')->delete();
-            DB::table('genres')->delete();
-            DB::table('genre_song')->delete();
             DB::table('songs')->delete();
 
             $file = File::get(database_path("seeders/data.json"));
@@ -76,16 +78,46 @@ class MusicSeeder extends Seeder
             }
 
             $genres = $data['genres'];
+            $genreTable = [];
             foreach ($genres as $genre) {
                 try {
-                    DB::table('genres')->insert([
+                    $showcasedAlbumId = Album::query()
+                        ->where('name', $genre['showcased_album'])
+                        ->firstOrFail()
+                        ->id;
+
+                    $genreTable[$genre['name']] = DB::table('genres')->insertGetId([
                         'name' => $genre['name'],
                         'description' => $genre['description'],
+                        'showcased_album_id' => $showcasedAlbumId,
+                        'genre_type' => GenreTypeEnum::GENRE,
                         'created_at' => $now,
                     ]);
                 } catch (\Exception $e) {
                     throw new \Exception(
                         "Invalid data for genre:\n".json_encode($genre)."\nError:\n".$e->getMessage()
+                    );
+                }
+            }
+
+            $decades = $data['decades'];
+            foreach ($decades as $decade) {
+                try {
+                    $showcasedAlbumId = Album::query()
+                        ->where('name', $decade['showcased_album'])
+                        ->firstOrFail()
+                        ->id;
+
+                    $genreTable[$decade['decade']] = DB::table('genres')->insertGetId([
+                        'name' => $decade['decade'].'s',
+                        'description' => $decade['description'],
+                        'showcased_album_id' => $showcasedAlbumId,
+                        'genre_type' => GenreTypeEnum::DECADE,
+                        'created_at' => $now,
+                    ]);
+                } catch (\Exception $e) {
+                    throw new \Exception(
+                        "Invalid data for decade:\n".json_encode($decade)."\nError:\n".$e->getMessage()
                     );
                 }
             }
@@ -99,7 +131,7 @@ class MusicSeeder extends Seeder
                     $album_id = $album->id;
                     $artist_id = $album->artist->id;
 
-                    DB::table('songs')->insert([
+                    $songId = DB::table('songs')->insertGetId([
                         'name' => $song['name'],
                         'duration_seconds' => $song['duration_seconds'],
                         'views_on_spotify' => $song['views_on_spotify'],
@@ -107,13 +139,28 @@ class MusicSeeder extends Seeder
                         'artist_id' => $artist_id,
                         'created_at' => $now,
                     ]);
+
+                    $rawYear = CarbonImmutable::parse($album->release_date)->year;
+                    ray($rawYear);
+                    $decade = intval(($rawYear % 100) / 10) * 10;
+                    ray($decade);
+                    DB::table('genre_song')->insert([
+                        'genre_id' => $genreTable[$decade],
+                        'song_id' => $songId,
+                    ]);
+
+                    foreach ($song['genres'] as $genre) {
+                        DB::table('genre_song')->insert([
+                            'genre_id' => $genreTable[$genre],
+                            'song_id' => $songId,
+                        ]);
+                    }
                 } catch (\Exception $e) {
                     throw new \Exception(
-                        "Invalid data for song:\n".json_encode($song)."\nError:\n".$e->getMessage()
+                        "Invalid data for song:\n\t".json_encode($song)."\n\tError:\n\t".$e->getMessage()
                     );
                 }
             }
-
         });
     }
 }

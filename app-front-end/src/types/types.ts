@@ -32,14 +32,10 @@ export type GameData = {
 
 export type GameState = "start" | "playing" | "lost";
 
-export type SessionData = {
-  state:     GameState;
-  prevScore: number;
-  highScore: number;
-}
-
 export type GenreDO = {
   id: number;
   name: string;
   description: string;
+  showcased_album: string;
+  genre_type: "genre" | "decade";
 }

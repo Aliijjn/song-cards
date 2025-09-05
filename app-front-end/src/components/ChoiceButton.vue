@@ -11,6 +11,7 @@ import {
   type SessionData,
 } from '../types/types';
 import dayjs from 'dayjs';
+import { getAlbumUrl } from "../tools.ts";
 
 const props = defineProps<{
   button: ButtonData | null
@@ -58,9 +59,7 @@ const parseSongStat = computed((): string[] => {
 })
 
 const albumCoverUrl = computed((): string => {
-  return `https://localhost:8001/storage/${
-    button.value?.song.album_name_clean
-  }`
+  return getAlbumUrl(button.value?.song.album_name_clean ?? "")
 })
 
 </script>
@@ -68,27 +67,25 @@ const albumCoverUrl = computed((): string => {
 <template>
   <v-col cols="12" sm="6">
     <v-card
-      class="mb-0 card-transition"
-      color="primary"
-      elevation="4"
+      class="mb-0 mx-2"
       @click="emit('click', button?.index ?? 0)"
       :loading="button === null"
       :disabled="button?.state !== 'default'"
     >
       <v-card-title v-text="button?.song.name" />
-      <v-card-subtitle class="mt-n2" v-text="button?.song.artist_name" />
+      <v-card-subtitle v-text="button?.song.artist_name" />
 
       <v-img
         :src="albumCoverUrl"
         aspect-ratio="1"
-        class="ma-3"
+        class="ma-2"
         @loadstart="loading = true"
         @load="loading = false"
       />
 
       <v-card-title
         v-if="button?.state && button?.state !== 'default'"
-        :class="`text-${button?.state} song-stat-transition`"
+        :class="`text-${button?.state}`"
       >
         <span>{{ parseSongStat[0] }}</span>
         <span class="font-weight-bold">{{ parseSongStat[1] }}</span>
@@ -98,12 +95,4 @@ const albumCoverUrl = computed((): string => {
 </template>
 
 <style scoped>
-.card-transition {
-  transition: all 1s ease;
-}
-
-.song-stat-transition {
-  transition: all 1s ease;
-  overflow: hidden;
-}
 </style>

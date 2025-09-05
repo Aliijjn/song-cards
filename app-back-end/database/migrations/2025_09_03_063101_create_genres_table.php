@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
+            $table->foreignId('showcased_album_id')->constrained('albums');
+            $table->string('genre_type');
             $table->timestamps();
         });
 

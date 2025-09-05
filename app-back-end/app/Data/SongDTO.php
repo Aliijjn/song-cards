@@ -20,14 +20,13 @@ class SongDTO extends Data
 
     public static function fromModel(Song $song): self
     {
-        ray(Storage::disk('public')->exists($song->album->name_clean.'.png'), $song->album->name_clean.'.png');
         return new self(
             $song->name,
             $song->artist->name,
             $song->album->name,
-            Storage::disk('public')->exists($song->album->name_clean.'.png')
-                ? $song->album->name_clean.'.png'
-                : 'default.png',
+            Storage::disk('public')->exists($song->album->name_clean.env('ALBUM_COVER_FILE_TYPE'))
+                ? $song->album->name_clean.env('ALBUM_COVER_FILE_TYPE')
+                : env('ALBUM_COVER_DEFAULT').env('ALBUM_COVER_FILE_TYPE'),
             $song->duration_seconds,
             $song->views_on_spotify,
             $song->album->release_date,

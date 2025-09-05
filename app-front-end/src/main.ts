@@ -12,14 +12,16 @@ import * as directives from 'vuetify/directives'
 const customDarkMode = {
   dark: true,
   colors: {
-    background: '#121212',
-    surface: '#1D1D1D',
-    primary: '#2A2A2A',
+    background: 'hsl(0, 0%, 0%)',
+    surface: 'hsl(0, 0%, 8%)',
+    primary: 'hsl(0, 0%, 16%)',
     secondary: '#777777',
     error: '#DC143C',
     'correct': '#1DB954',
     'incorrect': '#DC143C',
-    'text': '#FFFFFF',
+    'text': 'hsl(0, 0%, 95%)',
+    'textMuted': 'hsl(0, 0%, 70%)',
+    'textDivider': 'hsl(0, 0%, 40%)',
   },
 }
 
@@ -29,14 +31,22 @@ const vuetify = createVuetify({
   defaults: {
     VCard: {
       elevation: 4,
+      color: 'primary',
       class: ["pa-2"],
     },
     VBtn: {
       elevation: 4,
+      color: 'primary',
     },
     VDivider: {
       class: ["pb-2", "mt-2"],
       color: 'text',
+    },
+    VCardTitle: {
+      class: ["mt-n1", "mx-n2", "text-text"],
+    },
+    VCardSubtitle: {
+      class: ["mt-n2", "mx-n2", "text-textMuted"],
     },
   },
   theme: {
