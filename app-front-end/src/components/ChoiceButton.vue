@@ -72,8 +72,8 @@ const albumCoverUrl = computed((): string => {
       :loading="button === null"
       :disabled="button?.state !== 'default'"
     >
-      <v-card-title v-text="button?.song.name" />
-      <v-card-subtitle v-text="button?.song.artist_name" />
+      <v-card-title :class="`text-${button?.state}`" v-text="button?.song.name" />
+      <v-card-subtitle :class="`text-${button?.state}`" v-text="button?.song.artist_name" />
 
       <v-img
         :src="albumCoverUrl"

@@ -13,7 +13,7 @@ const store = useSongStore();
 
 <template>
   <v-app>
-    <v-main class="mx-auto bg-surface pa-4" style="width: 1080px;">
+    <v-main class="mx-auto bg-surface pa-4" style="width: 1440px;">
       <start v-if="store.gameState === 'start'" />
       <quiz v-else-if="store.gameState === 'playing'" />
       <lost v-else />

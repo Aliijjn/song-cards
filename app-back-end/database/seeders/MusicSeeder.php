@@ -11,6 +11,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 
 class MusicSeeder extends Seeder
 {
@@ -30,6 +31,44 @@ class MusicSeeder extends Seeder
 
     public function run(): void
     {
+//        $response = Http::asForm()->post('https://accounts.spotify.com/api/token', [
+//            'grant_type' => 'client_credentials',
+//            'client_id' => env('SPOTIFY_CLIENT_ID'),
+//            'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+//        ]);
+//
+//        $token = $response->json()['access_token'];
+//        ray($token)->label('token');
+//
+//        $file = File::get(database_path("seeders/data/artists.json"));
+//        $artistsToQuery = json_decode($file, true)['artists'];
+//
+//        $parsedArtists = [];
+//        foreach ($artistsToQuery as $artist) {
+//            $response = Http::withToken($token)
+//                ->get('https://api.spotify.com/v1/search', [
+//                    'q' => $artist['name'],
+//                    'type' => 'artist',
+//                    'limit' => 1,
+//                ]);
+//            $parsedArtists[] = $response->json()['artists']['items'][0];
+//        }
+//
+//        ray($parsedArtists)->label('artists');
+//
+//        $songs = [];
+//        foreach ($parsedArtists as $artist) {
+//            $response = Http::withToken($token)
+//                ->get('https://api.spotify.com/v1/artists/' . $artist['id'] . '/top-tracks');
+//            ray($response->json())->label("top-tracks of {$artist['name']}");
+//            array_merge($songs, $response->json()['tracks']);
+//        }
+//
+//        ray($songs)->label('songs');
+//
+//
+//        return;
+
         DB::transaction(function () {
             DB::table('genre_song')->delete();
             DB::table('genres')->delete();

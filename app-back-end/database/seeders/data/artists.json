@@ -1,0 +1,9 @@
+{
+    "artists": [
+        { "name": "Dire Staits",  "songs": "8" },
+        { "name": "Queen",        "songs": "10" },
+        { "name": "The Beatles",  "songs": "20" },
+        { "name": "The Doors",    "songs": "10" },
+        { "name": "King Crimson", "songs": "5" }
+    ]
+}

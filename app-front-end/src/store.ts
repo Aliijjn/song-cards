@@ -1,14 +1,14 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type {GameState, GenreDO} from "./types/types.ts";
+import type {GameState, GenreDTO} from "./types/types.ts";
 
 export const useSongStore = defineStore("songStore", () => {
     const gameState = ref<GameState>('start');
     const prevScore = ref<number>(0);
     const highScore = ref<number>(0);
 
-    const genres = ref<GenreDO[]>([]);
-    const decades = ref<GenreDO[]>([]);
+    const genres = ref<GenreDTO[]>([]);
+    const decades = ref<GenreDTO[]>([]);
     const selectedGenreId = ref<number | null>(null);
 
     async function fetchGenres() {
@@ -20,7 +20,7 @@ export const useSongStore = defineStore("songStore", () => {
                 return;
             }
 
-            for (const genre of (await response.json()) as GenreDO[]) {
+            for (const genre of (await response.json()) as GenreDTO[]) {
                 if (genre.genre_type === "genre") {
                     genres.value.push(genre);
                 } else {

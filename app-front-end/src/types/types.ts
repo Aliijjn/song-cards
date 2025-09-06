@@ -32,7 +32,7 @@ export type GameData = {
 
 export type GameState = "start" | "playing" | "lost";
 
-export type GenreDO = {
+export type GenreDTO = {
   id: number;
   name: string;
   description: string;

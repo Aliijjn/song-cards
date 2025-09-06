@@ -28,14 +28,24 @@
     ],
 
     "albums": [
+        { "name": "Meddle", "release_date": "1971-11-30", "artist_name": "Pink Floyd" },
+        { "name": "The Dark Side of the Moon", "release_date": "1973-03-01", "artist_name": "Pink Floyd" },
         { "name": "The Wall", "release_date": "1979-11-30", "artist_name": "Pink Floyd" },
+
         { "name": "Led Zeppelin IV", "release_date": "1971-11-08", "artist_name": "Led Zeppelin" },
         { "name": "Fragile", "release_date": "1971-11-12", "artist_name": "Yes" },
-        { "name": "The Dark Side of the Moon", "release_date": "1973-03-01", "artist_name": "Pink Floyd" },
+        { "name": "Disraeli Gears", "release_date": "1967-11-02", "artist_name": "Cream" },
         { "name": "Wheels of Fire", "release_date": "1968-06-14", "artist_name": "Cream" },
         { "name": "In the Court of the Crimson King", "release_date": "1969-10-10", "artist_name": "King Crimson" },
-        { "name": "Meddle", "release_date": "1971-11-30", "artist_name": "Pink Floyd" },
+
         { "name": "Rubber Soul", "release_date": "1965-12-03", "artist_name": "The Beatles" },
+        { "name": "Revolver", "release_date": "1966-08-05", "artist_name": "The Beatles" },
+        { "name": "Sgt. Pepper's Lonely Hearts Club Band", "release_date": "1967-05-26", "artist_name": "The Beatles" },
+        { "name": "Magical Mystery Tour", "release_date": "1967-11-27", "artist_name": "The Beatles" },
+        { "name": "The Beatles (White Album)", "release_date": "1968-11-22", "artist_name": "The Beatles" },
+        { "name": "Abbey Road", "release_date": "1969-09-26", "artist_name": "The Beatles" },
+        { "name": "Let It Be", "release_date": "1970-05-08", "artist_name": "The Beatles" },
+
         { "name": "Emerson, Lake & Palmer", "release_date": "1970-10-01", "artist_name": "Emerson, Lake & Palmer" },
         { "name": "The Doors", "release_date": "1967-01-04", "artist_name": "The Doors" },
         { "name": "Selling England by the Pound", "release_date": "1973-10-13", "artist_name": "Genesis" },
@@ -58,24 +68,24 @@
         { "name": "Synchronicity", "release_date": "1983-06-17", "artist_name": "The Police" },
         { "name": "British Steel", "release_date": "1980-04-14", "artist_name": "Judas Priest" },
         { "name": "Ace of Spades", "release_date": "1980-06-30", "artist_name": "Motörhead" },
-        { "name": "Rising", "release_date": "1976-05-17", "artist_name": "Rainbow" },
-        { "name": "Sgt. Pepper's Lonely Hearts Club Band", "release_date": "1967-05-26", "artist_name": "The Beatles" },
-        { "name": "Disraeli Gears", "release_date": "1967-11-02", "artist_name": "Cream" }
+        { "name": "Rising", "release_date": "1976-05-17", "artist_name": "Rainbow" }
     ],
 
     "genres": [
-        { "name": "Classic Rock", "showcased_album": "Who's Next", "description": "A broad rock category covering timeless rock classics from the 60s to the 80s" },
-        { "name": "Psychedelic Rock", "showcased_album": "The Doors", "description": "Rock meets the psychedelics from the 60s, featuring experimental sounds, surreal lyrics, and studio effects" },
-        { "name": "Hard Rock", "showcased_album": "Machine Head", "description": "Rock turning it up a notch, featuring heavy, distorted guitars and powerful vocals" },
-        { "name": "Heavy Metal", "showcased_album": "Paranoid", "description": "Even heavier music, with screeching guitars, aggressive vocals and dark themes"},
-        { "name": "Progressive Rock", "showcased_album": "In the Court of the Crimson King", "description": "Rock taken to its limits, with varied instrumentation, conceptual themes, and long instrumentals" },
-        { "name": "Blues Rock", "showcased_album": "Wheels of Fire", "description": "Rock music rooted in blues scales and rhythms, often featuring guitar solos and emotional intensity" }
+        { "name": "Classic Rock", "showcased_album": "Who's Next", "description": "Timeless rock classics from the 60s to the 80s" },
+        { "name": "Psychedelic Rock", "showcased_album": "The Doors", "description": "Rock meets the psychedelics from the 60s" },
+        { "name": "Hard Rock", "showcased_album": "Machine Head", "description": "The heaviest that rock has to offer" },
+        { "name": "Heavy Metal", "showcased_album": "Paranoid", "description": "Screeching guitars and aggressive vocals"},
+        { "name": "Progressive Rock", "showcased_album": "In the Court of the Crimson King", "description": "Rock featuring long, complex arrangements" },
+        { "name": "Pop Rock", "showcased_album": "Who's Next", "description": "Rock for a wider audience" },
+        { "name": "Soft Rock", "showcased_album": "Who's Next", "description": "A more mellow approach to the rock formula" },
+        { "name": "Blues Rock", "showcased_album": "Wheels of Fire", "description": "Rock music rooted in blues scales and rhythms" }
     ],
 
     "decades": [
         { "decade": "60", "showcased_album": "Rubber Soul", "description": "A decade of cultural shifts and musical exploration" },
-        { "decade": "70", "showcased_album": "The Dark Side of the Moon", "description": "An era of ambitious artistry and groundbreaking creativity" },
-        { "decade": "80", "showcased_album": "Brothers In Arms", "description": "Energetic and anthem-driven rock, laced with some new-wave influences" }
+        { "decade": "70", "showcased_album": "The Dark Side of the Moon", "description": "A decade of ambitious artistry and creativity" },
+        { "decade": "80", "showcased_album": "Brothers In Arms", "description": "The peak of energetic and anthem-driven rock" }
     ],
 
     "songs": [
@@ -86,10 +96,44 @@
         { "name": "White Room", "duration_seconds": 298, "views_on_spotify": 338000000, "album_name": "Wheels of Fire", "genres": ["Classic Rock", "Psychedelic Rock", "Blues Rock"] },
         { "name": "In the Court of the Crimson King", "duration_seconds": 605, "views_on_spotify": 22000000, "album_name": "In the Court of the Crimson King", "genres": ["Progressive Rock"] },
         { "name": "Echoes", "duration_seconds": 1412, "views_on_spotify": 70000000, "album_name": "Meddle", "genres": ["Progressive Rock"] },
+        { "name": "Drive My Car", "duration_seconds": 148, "views_on_spotify": 134000000, "album_name": "Rubber Soul", "genres": ["Pop Rock"] },
+        { "name": "Norwegian Wood (This Bird Has Flown)", "duration_seconds": 124, "views_on_spotify": 256000000, "album_name": "Rubber Soul", "genres": ["Psychedelic Rock"] },
+        { "name": "Michelle", "duration_seconds": 162, "views_on_spotify": 176700000, "album_name": "Rubber Soul", "genres": ["Pop Rock", "Soft Rock"] },
         { "name": "In My Life", "duration_seconds": 146, "views_on_spotify": 541000000, "album_name": "Rubber Soul", "genres": ["Psychedelic Rock"] },
+
+        { "name": "Taxman", "duration_seconds": 158, "views_on_spotify": 65600000, "album_name": "Revolver", "genres": ["Hard Rock", "Psychedelic Rock"] },
+        { "name": "Eleanor Rigby", "duration_seconds": 126, "views_on_spotify": 333700000, "album_name": "Revolver", "genres": ["Psychedelic Rock"] },
+        { "name": "Here, There And Everywhere", "duration_seconds": 144, "views_on_spotify": 135800000, "album_name": "Revolver", "genres": ["Soft Rock"] },
+        { "name": "Yellow Submarine", "duration_seconds": 158, "views_on_spotify": 160400000, "album_name": "Revolver", "genres": ["Pop Rock"] },
+        { "name": "Tomorrow Never Knows", "duration_seconds": 179, "views_on_spotify": 45200000, "album_name": "Revolver", "genres": ["Psychedelic Rock"] },
+
+        { "name": "With A Little Help From My Friends", "duration_seconds": 164, "views_on_spotify": 157400000, "album_name": "Sgt. Pepper's Lonely Hearts Club Band", "genres": ["Pop Rock"] },
+        { "name": "Lucy in the Sky with Diamonds", "duration_seconds": 208, "views_on_spotify": 209400000, "album_name": "Sgt. Pepper's Lonely Hearts Club Band", "genres": ["Psychedelic Rock"] },
+        { "name": "A Day in the Life", "duration_seconds": 337, "views_on_spotify": 149000000, "album_name": "Sgt. Pepper's Lonely Hearts Club Band", "genres": ["Psychedelic Rock"] },
+
+        { "name": "I Am The Walrus", "duration_seconds": 275, "views_on_spotify": 111800000, "album_name": "Magical Mystery Tour", "genres": ["Psychedelic Rock"] },
+        { "name": "Strawberry Fields Forever", "duration_seconds": 247, "views_on_spotify": 246000000, "album_name": "Magical Mystery Tour", "genres": ["Psychedelic Rock"] },
+        { "name": "All You Need Is Love", "duration_seconds": 210, "views_on_spotify": 232500000, "album_name": "Magical Mystery Tour", "genres": ["Pop Rock"] },
+
+        { "name": "Back In The USSR", "duration_seconds": 163, "views_on_spotify": 149200000, "album_name": "The Beatles (White Album)", "genres": ["Classic Rock"] },
+        { "name": "Dear Prudence", "duration_seconds": 235, "views_on_spotify": 88700000, "album_name": "The Beatles (White Album)", "genres": ["Psychedelic Rock"] },
+        { "name": "Ob-La-Di, Ob-La-Da", "duration_seconds": 188, "views_on_spotify": 318600000, "album_name": "The Beatles (White Album)", "genres": ["Pop Rock"] },
+        { "name": "While My Guitar Gently Weeps", "duration_seconds": 285, "views_on_spotify": 324000000, "album_name": "The Beatles (White Album)", "genres": ["Classic Rock"] },
+        { "name": "Birthday", "duration_seconds": 285, "views_on_spotify": 36600000, "album_name": "The Beatles (White Album)", "genres": ["Hard Rock"] },
+        { "name": "Helter Skelter", "duration_seconds": 269, "views_on_spotify": 94800000, "album_name": "The Beatles (White Album)", "genres": ["Hard Rock", "Heavy Metal"] },
+
+        { "name": "Come Together", "duration_seconds": 259, "views_on_spotify": 875900000, "album_name": "Abbey Road", "genres": ["Classic Rock", "Soft Rock"] },
+        { "name": "Something", "duration_seconds": 182, "views_on_spotify": 424600000, "album_name": "Abbey Road", "genres": ["Classic Rock", "Soft Rock"] },
+        { "name": "Here Comes The Sun", "duration_seconds": 185, "views_on_spotify": 1667500000, "album_name": "Abbey Road", "genres": ["Classic Rock", "Soft Rock", "Pop Rock"] },
+        { "name": "The End", "duration_seconds": 141, "views_on_spotify": 51400000, "album_name": "Abbey Road", "genres": ["Classic Rock", "Hard Rock"] },
+
+        { "name": "Across The Universe", "duration_seconds": 228, "views_on_spotify": 165300000, "album_name": "Let It Be", "genres": ["Soft Rock"] },
+        { "name": "I Me Mine", "duration_seconds": 145, "views_on_spotify": 33400000, "album_name": "Let It Be", "genres": [] },
+        { "name": "Let It Be", "duration_seconds": 243, "views_on_spotify": 851200000, "album_name": "Let It Be", "genres": ["Soft Rock"] },
+        { "name": "Get Back", "duration_seconds": 189, "views_on_spotify": 225100000, "album_name": "Let It Be", "genres": ["Classic Rock"] },
+
         { "name": "Lucky Man", "duration_seconds": 277, "views_on_spotify": 50000000, "album_name": "Emerson, Lake & Palmer", "genres": ["Progressive Rock"] },
         { "name": "The End", "duration_seconds": 703, "views_on_spotify": 144000000, "album_name": "The Doors", "genres": ["Psychedelic Rock"] },
-
         { "name": "Firth of Fifth", "duration_seconds": 570, "views_on_spotify": 24700000, "album_name": "Selling England by the Pound", "genres": ["Progressive Rock"] },
         { "name": "Dancing with the Moonlit Knight", "duration_seconds": 480, "views_on_spotify": 16600000, "album_name": "Selling England by the Pound", "genres": ["Progressive Rock"] },
         { "name": "Purple Haze", "duration_seconds": 170, "views_on_spotify": 393400000, "album_name": "Are You Experienced", "genres": ["Psychedelic Rock", "Blues Rock"] },
@@ -128,8 +172,6 @@
         { "name": "Every Breath You Take", "duration_seconds": 253, "views_on_spotify": 2870300000, "album_name": "Synchronicity", "genres": ["Classic Rock"] },
         { "name": "Breaking the Law", "duration_seconds": 153, "views_on_spotify": 331700000, "album_name": "British Steel", "genres": ["Heavy Metal", "Hard Rock"] },
         { "name": "Stargazer", "duration_seconds": 498, "views_on_spotify": 52300000, "album_name": "Rising", "genres": ["Hard Rock", "Heavy Metal"] },
-        { "name": "Lucy in the Sky with Diamonds", "duration_seconds": 208, "views_on_spotify": 209400000, "album_name": "Sgt. Pepper's Lonely Hearts Club Band", "genres": ["Psychedelic Rock"] },
-        { "name": "A Day in the Life", "duration_seconds": 337, "views_on_spotify": 149000000, "album_name": "Sgt. Pepper's Lonely Hearts Club Band", "genres": ["Psychedelic Rock"] },
         { "name": "Sunshine of Your Love", "duration_seconds": 250, "views_on_spotify": 475600000, "album_name": "Disraeli Gears", "genres": ["Classic Rock", "Blues Rock"] },
         { "name": "Strange Brew", "duration_seconds": 166, "views_on_spotify": 80000000, "album_name": "Disraeli Gears", "genres": ["Blues Rock"] }
     ]
