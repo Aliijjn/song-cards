@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Album extends Model
 {
-    /** @use HasFactory<\Database\Factories\AlbumFactory> */
-    use HasFactory;
-
     protected $guarded = ['id'];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected function casts(): array
     {
@@ -21,9 +20,9 @@ class Album extends Model
         ];
     }
 
-    public function artist(): BelongsTo
+    public function artist(): HasMany
     {
-        return $this->belongsTo(Artist::class);
+        return $this->HasMany(Artist::class);
     }
     public function songs(): HasMany
     {

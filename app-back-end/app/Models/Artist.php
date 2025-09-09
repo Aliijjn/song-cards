@@ -8,10 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Artist extends Model
 {
-    /** @use HasFactory<\Database\Factories\ArtistFactory> */
-    use HasFactory;
-
     protected $guarded = ['id'];
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    public function genres(): HasMany
+    {
+        return $this->hasMany(Genre::class);
+    }
 
     public function albums(): HasMany
     {

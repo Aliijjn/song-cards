@@ -6,200 +6,252 @@ use App\Enum\GenreTypeEnum;
 use App\Models\Album;
 use App\Models\Artist;
 use Carbon\CarbonImmutable;
-use http\Exception\InvalidArgumentException;
+use Illuminate\Console\Command;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
 class MusicSeeder extends Seeder
 {
+    private const BATCH_SIZE = 256;
+
     /**
      * Run the database seeds.
      */
-    private function name_clean(string $name): string
-    {
-        $name = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $name);
 
-        $name = strtolower($name);                 // lower-case
-        $name = preg_replace('/\s+/', '_', $name); // spaces → underscores
-        $name = preg_replace('/[^a-z0-9_]/', '', $name); // keep only [a-z0-9_]
-        $name = preg_replace('/_+/', '_', $name);  // collapse multiple _
-        return trim($name, '_');
+    private function fetchData(): array
+    {
+        $response = Http::asForm()->post('https://accounts.spotify.com/api/token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => env('SPOTIFY_CLIENT_ID'),
+            'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+        ]);
+        $token = $response->json()['access_token'];
+
+        $file = File::get(database_path("seeders/data/artists.json"));
+        $artistsToQuery = json_decode($file, true)['artists'];
+
+        $artists = collect();
+        foreach ($artistsToQuery as $artist) {
+            $response = Http::withToken($token)
+                ->get('https://api.spotify.com/v1/search', [
+                    'q'     => $artist['name'],
+                    'type'  => 'artist',
+                    'limit' => 1,
+                ]);
+            $artists->push($response->json()['artists']['items'][0]);
+        }
+        $artists = $artists->keyBy('id');
+
+        $songs = collect();
+        foreach ($artists as $artist) {
+            $response = Http::withToken($token)
+                ->get('https://api.spotify.com/v1/artists/' . $artist['id'] . '/top-tracks');
+            $songs = $songs->merge($response->json()['tracks']);
+        }
+        $songs = $songs->unique()->keyBy('id');
+
+        // Check if any new artists are found in songs (collaborations)
+        $newArtists = $songs->pluck('artists')
+            ->flatten(1)
+            ->unique('id')
+            ->filter(function ($artist) use ($artists) {
+                return ! $artists->contains('id', $artist['id']);
+            })
+            ->keyBy('id');
+        ray($newArtists)->label('newArtists');
+
+        $albums = $songs->pluck('album')
+            ->unique()
+            ->values()
+            ->keyBy('id');
+
+        // Genres are checked before rerunning artists to safe a headache
+        $genres = $artists->pluck('genres')
+            ->flatten()
+            ->unique()
+            ->values();
+
+        // Merge new artists after everything (they don't contain genres etc.)
+        $artists = $artists->merge($newArtists);
+
+        return [
+            $genres,
+            $artists,
+            $albums,
+            $songs,
+        ];
+    }
+
+    private function insertData(
+        Collection $genres,
+        Collection $artists,
+        Collection $albums,
+        Collection $songs
+    ): void {
+        $now = CarbonImmutable::now();
+
+        // Genres
+
+        $chunks = $genres->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('genres')->insert(
+                $chunk->map(fn ($genre) => [
+                    'name'       => $genre,
+                    'created_at' => $now,
+                ])->toArray()
+            );
+        }
+
+        // Artists
+
+        $chunks = $artists->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('artists')->insert(
+                $chunk->map(fn ($artist) => [
+                    'id'          => $artist['id'],
+                    'name'        => $artist['name'],
+                    'spotify_url' => $artist['external_urls']['spotify'] ?? null,
+                    'created_at'  => $now,
+                ])->toArray()
+            );
+        }
+
+        // Artist <-> Genre
+
+        $genreData = DB::table('genres')
+            ->whereIn('name', $genres)
+            ->pluck('id', 'name');
+
+        $artistGenreEntries = collect();
+        foreach ($artists as $artist) {
+            foreach ($artist['genres'] ?? [] as $genre) {
+                $artistGenreEntries->push([
+                    'artist_id' => $artist['id'],
+                    'genre_id'  => $genreData[$genre],
+                ]);
+            }
+        }
+
+        $chunks = $artistGenreEntries->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('artist_genre')->insert(
+                $chunk->map(fn ($artistGenre) => [
+                    'artist_id'  => $artistGenre['artist_id'],
+                    'genre_id'   => $artistGenre['genre_id'],
+                    'created_at' => $now,
+                ])->toArray()
+            );
+        }
+
+        // Albums
+
+        $chunks = $albums->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('albums')->insert(
+                $chunk->map(fn ($album) => [
+                    'id'                     => $album['id'],
+                    'name'                   => $album['name'],
+                    'spotify_url'            => $album['external_urls']['spotify'] ?? null,
+                    'album_cover_url'        => $album['images'][0]['url'],
+                    'release_date'           => $album['release_date'],
+                    'release_date_precision' => $album['release_date_precision'],
+                    'total_tracks'           => $album['total_tracks'],
+                    'created_at'             => $now,
+                ])->toArray()
+            );
+        }
+
+        // Album <-> Artist
+
+        $albumArtistEntries = collect();
+        foreach ($albums as $album) {
+            foreach ($album['artists'] as $artist) {
+                $albumArtistEntries->push([
+                    'album_id'  => $album['id'],
+                    'artist_id' => $artist['id'],
+                ]);
+            }
+        }
+
+        $chunks = $albumArtistEntries->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('album_artist')->insert(
+                $chunk->map(fn ($albumArtist) => [
+                    'album_id'   => $albumArtist['album_id'],
+                    'artist_id'  => $albumArtist['artist_id'],
+                    'created_at' => $now,
+                ])->toArray()
+            );
+        }
+
+        // Songs
+
+        $chunks = $songs->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('songs')->insert(
+                $chunk->map(fn ($song) => [
+                    'id'           => $song['id'],
+                    'name'         => $song['name'],
+                    'spotify_url'  => $song['external_urls']['spotify'] ?? null,
+                    'album_id'     => $song['album']['id'],
+                    'duration_ms'  => $song['duration_ms'],
+                    'popularity'   => $song['popularity'],
+                    'track_number' => $song['track_number'],
+                    'created_at'   => $now,
+                ])->toArray()
+            );
+        }
+
+        // Artist <-> Song
+
+        $artistSongEntries = collect();
+        foreach ($songs as $song) {
+            foreach ($song['artists'] as $artist) {
+                $artistSongEntries->push([
+                    'artist_id' => $artist['id'],
+                    'song_id'   => $song['id'],
+                ]);
+            }
+        }
+
+        $chunks = $artistSongEntries->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('artist_song')->insert(
+                $chunk->map(fn ($artistSong) => [
+                    'artist_id'  => $artistSong['artist_id'],
+                    'song_id'    => $artistSong['song_id'],
+                    'created_at' => $now,
+                ])->toArray()
+            );
+        }
     }
 
     public function run(): void
     {
-//        $response = Http::asForm()->post('https://accounts.spotify.com/api/token', [
-//            'grant_type' => 'client_credentials',
-//            'client_id' => env('SPOTIFY_CLIENT_ID'),
-//            'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
-//        ]);
-//
-//        $token = $response->json()['access_token'];
-//        ray($token)->label('token');
-//
-//        $file = File::get(database_path("seeders/data/artists.json"));
-//        $artistsToQuery = json_decode($file, true)['artists'];
-//
-//        $parsedArtists = [];
-//        foreach ($artistsToQuery as $artist) {
-//            $response = Http::withToken($token)
-//                ->get('https://api.spotify.com/v1/search', [
-//                    'q' => $artist['name'],
-//                    'type' => 'artist',
-//                    'limit' => 1,
-//                ]);
-//            $parsedArtists[] = $response->json()['artists']['items'][0];
-//        }
-//
-//        ray($parsedArtists)->label('artists');
-//
-//        $songs = [];
-//        foreach ($parsedArtists as $artist) {
-//            $response = Http::withToken($token)
-//                ->get('https://api.spotify.com/v1/artists/' . $artist['id'] . '/top-tracks');
-//            ray($response->json())->label("top-tracks of {$artist['name']}");
-//            array_merge($songs, $response->json()['tracks']);
-//        }
-//
-//        ray($songs)->label('songs');
-//
-//
-//        return;
-
         DB::transaction(function () {
-            DB::table('genre_song')->delete();
-            DB::table('genres')->delete();
+
+            DB::table('artist_song')->delete();
+            DB::table('album_artist')->delete();
+            DB::table('artist_genre')->delete();
+            DB::table('songs')->delete();
             DB::table('albums')->delete();
             DB::table('artists')->delete();
-            DB::table('songs')->delete();
+            DB::table('genres')->delete();
 
-            $file = File::get(database_path("seeders/data.json"));
-            $data = json_decode($file, true);
-            $now = Carbon::now()->format('Y-m-d H:i:s');
+            [$genres, $artists, $albums, $songs] = $this->fetchData();
 
-            $artists = $data['artists'];
-            foreach ($artists as $artist) {
-                try {
-                    DB::table('artists')->insert([
-                        'name' => $artist['name'],
-                        'created_at' => $now,
-                    ]);
-                } catch (\Exception $e) {
-                    throw new \Exception(
-                        "Invalid data for artist:\n".json_encode($artist)."\nError:\n".$e->getMessage()
-                    );
-                }
-            }
+            ray($genres)->label('genres');
+            ray($artists)->label('artists');
+            ray($albums)->label('albums');
+            ray($songs)->label('songs');
+            ray($songs['2fuCquhmrzHpu5xcA1ci9x'])->label('under pressure');
 
-            $albums = $data['albums'];
-            foreach ($albums as $album) {
-                try {
-                    $artist_id = Artist::query()
-                        ->where('name', $album['artist_name'])
-                        ->firstOrFail()
-                        ->id;
+            $this->insertData($genres, $artists, $albums, $songs);
 
-                    DB::table('albums')->insert([
-                        'name' => $album['name'],
-                        'name_clean' => $this->name_clean($album['name']),
-                        'release_date' => $album['release_date'],
-                        'artist_id' => $artist_id,
-                        'created_at' => $now,
-                    ]);
-                } catch (\Exception $e) {
-                    throw new \Exception(
-                        "Invalid data for album:\n".json_encode($album)."\nError:\n".$e->getMessage()
-                    );
-                }
-            }
-
-            $genres = $data['genres'];
-            $genreTable = [];
-            foreach ($genres as $genre) {
-                try {
-                    $showcasedAlbumId = Album::query()
-                        ->where('name', $genre['showcased_album'])
-                        ->firstOrFail()
-                        ->id;
-
-                    $genreTable[$genre['name']] = DB::table('genres')->insertGetId([
-                        'name' => $genre['name'],
-                        'description' => $genre['description'],
-                        'showcased_album_id' => $showcasedAlbumId,
-                        'genre_type' => GenreTypeEnum::GENRE,
-                        'created_at' => $now,
-                    ]);
-                } catch (\Exception $e) {
-                    throw new \Exception(
-                        "Invalid data for genre:\n".json_encode($genre)."\nError:\n".$e->getMessage()
-                    );
-                }
-            }
-
-            $decades = $data['decades'];
-            foreach ($decades as $decade) {
-                try {
-                    $showcasedAlbumId = Album::query()
-                        ->where('name', $decade['showcased_album'])
-                        ->firstOrFail()
-                        ->id;
-
-                    $genreTable[$decade['decade']] = DB::table('genres')->insertGetId([
-                        'name' => $decade['decade'].'s',
-                        'description' => $decade['description'],
-                        'showcased_album_id' => $showcasedAlbumId,
-                        'genre_type' => GenreTypeEnum::DECADE,
-                        'created_at' => $now,
-                    ]);
-                } catch (\Exception $e) {
-                    throw new \Exception(
-                        "Invalid data for decade:\n".json_encode($decade)."\nError:\n".$e->getMessage()
-                    );
-                }
-            }
-
-            $songs = $data['songs'];
-            foreach ($songs as $song) {
-                try {
-                    $album = Album::query()
-                        ->where('name', $song['album_name'])
-                        ->firstOrFail();
-                    $album_id = $album->id;
-                    $artist_id = $album->artist->id;
-
-                    $songId = DB::table('songs')->insertGetId([
-                        'name' => $song['name'],
-                        'duration_seconds' => $song['duration_seconds'],
-                        'views_on_spotify' => $song['views_on_spotify'],
-                        'album_id' => $album_id,
-                        'artist_id' => $artist_id,
-                        'created_at' => $now,
-                    ]);
-
-                    $rawYear = CarbonImmutable::parse($album->release_date)->year;
-                    ray($rawYear);
-                    $decade = intval(($rawYear % 100) / 10) * 10;
-                    ray($decade);
-                    DB::table('genre_song')->insert([
-                        'genre_id' => $genreTable[$decade],
-                        'song_id' => $songId,
-                    ]);
-
-                    foreach ($song['genres'] as $genre) {
-                        DB::table('genre_song')->insert([
-                            'genre_id' => $genreTable[$genre],
-                            'song_id' => $songId,
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    throw new \Exception(
-                        "Invalid data for song:\n\t".json_encode($song)."\n\tError:\n\t".$e->getMessage()
-                    );
-                }
-            }
         });
     }
 }

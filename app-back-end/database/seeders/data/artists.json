@@ -1,9 +1,9 @@
 {
     "artists": [
-        { "name": "Dire Staits",  "songs": "8" },
-        { "name": "Queen",        "songs": "10" },
-        { "name": "The Beatles",  "songs": "20" },
-        { "name": "The Doors",    "songs": "10" },
-        { "name": "King Crimson", "songs": "5" }
+        { "name": "Dire Staits",  "edits": {} },
+        { "name": "Queen",        "edits": {} },
+        { "name": "The Beatles",  "edits": {} },
+        { "name": "The Doors",    "edits": {} },
+        { "name": "King Crimson", "edits": { "genres": ["Progressive Rock", "Art Rock"] } }
     ]
 }
