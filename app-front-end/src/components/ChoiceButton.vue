@@ -8,10 +8,8 @@ import {
   type ButtonData,
   type GameData,
   type GameState,
-  type SessionData,
 } from '../types/types';
 import dayjs from 'dayjs';
-import { getAlbumUrl } from "../tools.ts";
 
 const props = defineProps<{
   button: ButtonData | null
@@ -22,25 +20,6 @@ const loading = ref(true);
 
 const emit = defineEmits(['click'])
 
-function formatStreams(value: number): string {
-  const len = value.toString().length - 1;
-  const postfixes: { len: number, char: string }[] = [
-    { len: 9, char: 'B' },
-    { len: 6, char: 'M' },
-    { len: 3, char: 'K' },
-  ]
-  const postfix = postfixes.find((p) => p.len <= len)?.char ?? "";
-  let precision = 0;
-
-  if (len >= 12) {
-    value /= 10 ** 9;
-  } else if (len >= 3) {
-    value /= (10 ** (len - len % 3));
-    precision = 2 - len % 3;
-  }
-  return (value).toFixed(precision) + postfix;
-}
-
 const parseSongStat = computed((): string[] => {
   let val = button.value?.song[button.value.songStat]
   switch (button.value?.songStat) {
@@ -50,16 +29,9 @@ const parseSongStat = computed((): string[] => {
     case 'release_date':
       val = val as string;
       return ["Release Date: ", dayjs(val).format("MMM D YYYY")];
-    case 'views_on_spotify':
-      val = val as number;
-      return ["Streams: ", formatStreams(val)]
     default:
       return [":(", "this shouldn't happen"]
   }
-})
-
-const albumCoverUrl = computed((): string => {
-  return getAlbumUrl(button.value?.song.album_name_clean ?? "")
 })
 
 </script>
@@ -73,10 +45,10 @@ const albumCoverUrl = computed((): string => {
       :disabled="button?.state !== 'default'"
     >
       <v-card-title :class="`text-${button?.state}`" v-text="button?.song.name" />
-      <v-card-subtitle :class="`text-${button?.state}`" v-text="button?.song.artist_name" />
+      <v-card-subtitle :class="`text-${button?.state}`" v-text="button?.song.artist_name.join(', ')" />
 
       <v-img
-        :src="albumCoverUrl"
+        :src="button?.song.album_cover_url"
         aspect-ratio="1"
         class="ma-2"
         @loadstart="loading = true"

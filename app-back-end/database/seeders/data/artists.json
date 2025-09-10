@@ -1,9 +1,14 @@
 {
     "artists": [
-        { "name": "Dire Staits",  "edits": {} },
-        { "name": "Queen",        "edits": {} },
-        { "name": "The Beatles",  "edits": {} },
-        { "name": "The Doors",    "edits": {} },
-        { "name": "King Crimson", "edits": { "genres": ["Progressive Rock", "Art Rock"] } }
+        { "name": "Dire Staits",   "edits": {} },
+        { "name": "Queen",         "edits": {} },
+        { "name": "The Beatles",   "edits": {} },
+        { "name": "The Doors",     "edits": {} },
+        { "name": "Black Sabbath", "edits": {} },
+        { "name": "Pink Floyd",    "edits": {} },
+        { "name": "Rammstein",     "edits": {} },
+        { "name": "Paramore",      "edits": {} },
+        { "name": "Camel",         "edits": {} },
+        { "name": "King Crimson",  "edits": { "genres": ["Progressive Rock", "Art Rock"] } }
     ]
 }

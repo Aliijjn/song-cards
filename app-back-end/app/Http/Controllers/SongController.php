@@ -24,13 +24,7 @@ class SongController extends Controller
 
         return new JsonResponse(
             SongDTO::collect(
-                Song::with(['artist', 'album', 'genres'])
-                    ->when($genreId, function ($query) use ($genreId) {
-                        $query->whereHas('genres', function ($query) use ($genreId) {
-                            $query->where('id', $genreId);
-                        });
-                    })
-                    ->get()
+                Song::with(['artist', 'album'])->get()
             )
         );
     }

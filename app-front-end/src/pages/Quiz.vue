@@ -26,8 +26,8 @@ const button2 = ref<ButtonData | null>(null)
 const questions: Record<GuessableStatKey, string> = {
   duration_seconds: "Which song is <strong>longer</strong>?",
   release_date:     "Which song is <strong>newer</strong>?",
-  views_on_spotify: "Which song has the <strong>most streams</strong> on Spotify?",
-} 
+  // views_on_spotify: "Which song has the <strong>most streams</strong> on Spotify?",
+}
 
 function setButtons() {
   if (!songs.value.length) return;
@@ -71,7 +71,7 @@ function clickButton(selectedButton: number | undefined) {
     button2.value.state = 'correct'
     setTimeout(() => {
       setButtons()
-    }, 2000)
+    }, 1500)
   } else {
     store.highScore = Math.max(store.highScore, gameData.value.score)
     store.prevScore = gameData.value.score
@@ -79,7 +79,7 @@ function clickButton(selectedButton: number | undefined) {
     button2.value.state = 'incorrect'
     setTimeout(() => {
       store.gameState = "lost"
-    }, 4000)
+    }, 3000)
   }
 }
 

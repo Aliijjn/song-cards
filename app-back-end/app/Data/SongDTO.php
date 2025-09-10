@@ -3,18 +3,17 @@
 namespace App\Data;
 
 use App\Models\Song;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Carbon\CarbonImmutable;
 class SongDTO extends Data
 {
     public function __construct(
         public string $name,
-        public string $artist_name,
+        public Collection $artist_name,
         public string $album_name,
-        public string $album_name_clean,
+        public string $album_cover_url,
         public int $duration_seconds,
-        public int $views_on_spotify,
         public CarbonImmutable $release_date,
     ) {}
 
@@ -22,13 +21,10 @@ class SongDTO extends Data
     {
         return new self(
             $song->name,
-            $song->artist->name,
+            $song->artist->pluck("name") ?: collect('Unknown Artist'),
             $song->album->name,
-            Storage::disk('public')->exists($song->album->name_clean.env('ALBUM_COVER_FILE_TYPE'))
-                ? $song->album->name_clean.env('ALBUM_COVER_FILE_TYPE')
-                : env('ALBUM_COVER_DEFAULT').env('ALBUM_COVER_FILE_TYPE'),
-            $song->duration_seconds,
-            $song->views_on_spotify,
+            $song->album->album_cover_url,
+            $song->duration_ms / 1000,
             $song->album->release_date,
         );
     }

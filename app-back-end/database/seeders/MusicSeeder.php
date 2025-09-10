@@ -248,7 +248,6 @@ class MusicSeeder extends Seeder
             ray($artists)->label('artists');
             ray($albums)->label('albums');
             ray($songs)->label('songs');
-            ray($songs['2fuCquhmrzHpu5xcA1ci9x'])->label('under pressure');
 
             $this->insertData($genres, $artists, $albums, $songs);
 

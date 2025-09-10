@@ -1,17 +1,15 @@
 export type SongDTO = {
   name:             string;
-  artist_name:      string;
+  artist_name:      string[];
   album_name:       string;
-  album_name_clean: string;
+  album_cover_url:  string;
   duration_seconds: number;
   release_date:     string;
-  views_on_spotify: number;
 }
 
 export const guessableStatKeys = [
   'duration_seconds',
   'release_date',
-  'views_on_spotify',
 ] as const;
 
 export type GuessableStatKey = typeof guessableStatKeys[number];
