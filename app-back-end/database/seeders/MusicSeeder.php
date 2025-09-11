@@ -22,6 +22,46 @@ class MusicSeeder extends Seeder
      * Run the database seeds.
      */
 
+    private function wipeTables(): void
+    {
+        DB::table('artist_song')->delete();
+        DB::table('album_artist')->delete();
+        DB::table('artist_genre')->delete();
+
+        DB::table('songs')->delete();
+        DB::table('albums')->delete();
+        DB::table('artists')->delete();
+        DB::table('genres')->delete();
+    }
+
+    public function editArtists(Collection &$artists, mixed $artistsData): void
+    {
+        $artistsData = collect($artistsData)->keyBy('name');
+        $artists = $artists->reject(function ($artist) use ($artistsData) {
+            ray($artist['name'], $artistsData[$artist['name']]['edits']['delete'] ?? false);
+            return ($artistsData[$artist['name']]['edits']['delete'] ?? false) === true;
+        })->toArray();
+
+        foreach ($artists as &$artist) {
+            $edits = $artistsData[$artist['name']]['edits'] ?? [];
+            foreach ($edits as $editKey => $editValue) {
+                if ($editKey === 'delete') {
+                    continue;
+                }
+                if (! isset($artist[$editKey])) {
+                    ray($editKey, $editValue, $artist)->label('invalid insertion')->orange();
+                    continue;
+                }
+                ray($artist[$editKey], $editValue, $artist)->label('insertion')->blue();
+                $artist[$editKey] = $editValue;
+//                ray($artist)->label('artist');
+            }
+        }
+        ray($artists)->label('artists');
+
+        $artists = collect($artists);
+    }
+
     private function fetchData(): array
     {
         $response = Http::asForm()->post('https://accounts.spotify.com/api/token', [
@@ -36,6 +76,9 @@ class MusicSeeder extends Seeder
 
         $artists = collect();
         foreach ($artistsToQuery as $artist) {
+            if (($artist['edits']['delete'] ?? false) === true) {
+                continue;
+            }
             $response = Http::withToken($token)
                 ->get('https://api.spotify.com/v1/search', [
                     'q'     => $artist['name'],
@@ -62,21 +105,21 @@ class MusicSeeder extends Seeder
                 return ! $artists->contains('id', $artist['id']);
             })
             ->keyBy('id');
-        ray($newArtists)->label('newArtists');
+
+        $artists = $artists->merge($newArtists);
+        $this->editArtists($artists, $artistsToQuery);
 
         $albums = $songs->pluck('album')
             ->unique()
             ->values()
             ->keyBy('id');
 
-        // Genres are checked before rerunning artists to safe a headache
-        $genres = $artists->pluck('genres')
+        $genres = $artists
+            ->filter(fn ($artist) => isset($artist['genres']))
+            ->pluck('genres')
             ->flatten()
             ->unique()
             ->values();
-
-        // Merge new artists after everything (they don't contain genres etc.)
-        $artists = $artists->merge($newArtists);
 
         return [
             $genres,
@@ -86,28 +129,8 @@ class MusicSeeder extends Seeder
         ];
     }
 
-    private function insertData(
-        Collection $genres,
-        Collection $artists,
-        Collection $albums,
-        Collection $songs
-    ): void {
-        $now = CarbonImmutable::now();
-
-        // Genres
-
-        $chunks = $genres->chunk(self::BATCH_SIZE);
-        foreach ($chunks as $chunk) {
-            DB::table('genres')->insert(
-                $chunk->map(fn ($genre) => [
-                    'name'       => $genre,
-                    'created_at' => $now,
-                ])->toArray()
-            );
-        }
-
-        // Artists
-
+    private function insertArtists(Collection $artists, CarbonImmutable $now): void
+    {
         $chunks = $artists->chunk(self::BATCH_SIZE);
         foreach ($chunks as $chunk) {
             DB::table('artists')->insert(
@@ -119,36 +142,10 @@ class MusicSeeder extends Seeder
                 ])->toArray()
             );
         }
+    }
 
-        // Artist <-> Genre
-
-        $genreData = DB::table('genres')
-            ->whereIn('name', $genres)
-            ->pluck('id', 'name');
-
-        $artistGenreEntries = collect();
-        foreach ($artists as $artist) {
-            foreach ($artist['genres'] ?? [] as $genre) {
-                $artistGenreEntries->push([
-                    'artist_id' => $artist['id'],
-                    'genre_id'  => $genreData[$genre],
-                ]);
-            }
-        }
-
-        $chunks = $artistGenreEntries->chunk(self::BATCH_SIZE);
-        foreach ($chunks as $chunk) {
-            DB::table('artist_genre')->insert(
-                $chunk->map(fn ($artistGenre) => [
-                    'artist_id'  => $artistGenre['artist_id'],
-                    'genre_id'   => $artistGenre['genre_id'],
-                    'created_at' => $now,
-                ])->toArray()
-            );
-        }
-
-        // Albums
-
+    private function insertAlbums(Collection $albums, CarbonImmutable $now): void
+    {
         $chunks = $albums->chunk(self::BATCH_SIZE);
         foreach ($chunks as $chunk) {
             DB::table('albums')->insert(
@@ -187,9 +184,10 @@ class MusicSeeder extends Seeder
                 ])->toArray()
             );
         }
+    }
 
-        // Songs
-
+    private function insertSongs(Collection $songs, Collection $artists, CarbonImmutable $now): void
+    {
         $chunks = $songs->chunk(self::BATCH_SIZE);
         foreach ($chunks as $chunk) {
             DB::table('songs')->insert(
@@ -211,10 +209,12 @@ class MusicSeeder extends Seeder
         $artistSongEntries = collect();
         foreach ($songs as $song) {
             foreach ($song['artists'] as $artist) {
-                $artistSongEntries->push([
-                    'artist_id' => $artist['id'],
-                    'song_id'   => $song['id'],
-                ]);
+                if (isset($artists[$artist['id']])) {
+                    $artistSongEntries->push([
+                        'artist_id' => $artist['id'],
+                        'song_id'   => $song['id'],
+                    ]);
+                }
             }
         }
 
@@ -230,26 +230,66 @@ class MusicSeeder extends Seeder
         }
     }
 
+    private function insertGenres(Collection $genres, Collection $artists, CarbonImmutable $now): void
+    {
+        $chunks = $genres->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('genres')->insert(
+                $chunk->map(fn ($genre) => [
+                    'name'       => $genre,
+                    'created_at' => $now,
+                ])->toArray()
+            );
+        }
+
+        // Artist <-> Genre
+
+        $genreData = DB::table('genres')
+            ->whereIn('name', $genres)
+            ->pluck('id', 'name');
+
+        $artistGenreEntries = collect();
+        foreach ($artists as $artist) {
+            foreach ($artist['genres'] ?? [] as $genre) {
+                $artistGenreEntries->push([
+                    'artist_id' => $artist['id'],
+                    'genre_id'  => $genreData[$genre],
+                ]);
+            }
+        }
+
+        $chunks = $artistGenreEntries->chunk(self::BATCH_SIZE);
+        foreach ($chunks as $chunk) {
+            DB::table('artist_genre')->insert(
+                $chunk->map(fn ($artistGenre) => [
+                    'artist_id'  => $artistGenre['artist_id'],
+                    'genre_id'   => $artistGenre['genre_id'],
+                    'created_at' => $now,
+                ])->toArray()
+            );
+        }
+    }
+
     public function run(): void
     {
         DB::transaction(function () {
 
-            DB::table('artist_song')->delete();
-            DB::table('album_artist')->delete();
-            DB::table('artist_genre')->delete();
-            DB::table('songs')->delete();
-            DB::table('albums')->delete();
-            DB::table('artists')->delete();
-            DB::table('genres')->delete();
-
+            // Setup
+            $this->wipeTables();
             [$genres, $artists, $albums, $songs] = $this->fetchData();
+            $now = CarbonImmutable::now();
 
+            // Print
             ray($genres)->label('genres');
             ray($artists)->label('artists');
             ray($albums)->label('albums');
             ray($songs)->label('songs');
 
-            $this->insertData($genres, $artists, $albums, $songs);
+            // To DB
+            $this->insertArtists($artists, $now);
+            $this->insertAlbums($albums, $now);
+            $this->insertSongs($songs, $artists, $now);
+            $this->insertGenres($genres, $artists, $now);
 
         });
     }
