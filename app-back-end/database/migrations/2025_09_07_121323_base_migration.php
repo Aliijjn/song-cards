@@ -19,6 +19,14 @@ return new class extends Migration
             Schema::create('genres', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
+                $table->string('album_id', self::BASE_62_ID_LENGTH)
+                    ->nullable();
+                $table->foreign('album_id')
+                    ->references('id')
+                    ->on('albums')
+                    ->nullOnDelete();
+                $table->text('description')
+                    ->nullable();
                 $table->timestamps();
             });
 
@@ -52,6 +60,8 @@ return new class extends Migration
                 $table->integer('duration_ms');
                 $table->integer('popularity');
                 $table->integer('track_number');
+                $table->dateTime('release_date')
+                    ->nullable();
                 $table->timestamps();
             });
 

@@ -15,16 +15,16 @@ class Artist extends Model
 
     public function genres(): BelongsToMany
     {
-        return $this->BelongsToMany(Genre::class);
+        return $this->belongsToMany(Genre::class);
     }
 
     public function albums(): BelongsToMany
     {
-        return $this->BelongsToMany(Album::class);
+        return $this->belongsToMany(Album::class);
     }
 
     public function songs(): BelongsToMany
     {
-        return $this->BelongsToMany(Song::class);
+        return $this->belongsToMany(Song::class);
     }
 }

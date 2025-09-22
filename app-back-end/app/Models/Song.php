@@ -16,11 +16,11 @@ class Song extends Model
 
     public function album(): BelongsTo
     {
-        return $this->BelongsTo(Album::class);
+        return $this->belongsTo(Album::class);
     }
 
-    public function artist(): BelongsToMany
+    public function artists(): BelongsToMany
     {
-        return $this->BelongsToMany(Artist::class, );
+        return $this->belongsToMany(Artist::class);
     }
 }

@@ -84,10 +84,7 @@ function clickButton(selectedButton: number | undefined) {
 }
 
 async function fetchData() {
-  const args = store.selectedGenreId === null
-    ? ""
-    : `?genre_id=${store.selectedGenreId.toString()}`;
-  console.log(args, store.selectedGenreId)
+  const args = `?genre_id=${store.selectedGenre?.id?.toString() ?? ""}&difficulty=${store.difficulty}`;
   const response = await fetch(
       `https://127.0.0.1:8001/api/songs${args}`
   )
@@ -111,7 +108,7 @@ watch(songs, () => {
   <v-card-title v-if="loading" title="Loading..." />
   <v-card-title v-else-if="!songs.length" title="shit broke D:" />
   <template v-else>
-    <v-card-title class="mb-2 text-h5" v-html="button1?.songStat ? questions[button1?.songStat] : 'default'"/>
+    <v-card-title class="mb-6" v-html="button1?.songStat ? questions[button1?.songStat] : 'default'"/>
     <v-card-text class="mx-n4">
       <v-row no-gutters>
         <choice-button :button="button1" @click="clickButton(button1?.index)" />

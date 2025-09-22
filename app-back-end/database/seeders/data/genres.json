@@ -1,0 +1,64 @@
+{
+    "genres": [
+        {
+            "name": "classic rock",
+            "album": "News Of The World (2011 Remaster)",
+            "description": "Anthemic riffs, powerful vocals, and timeless songs from the 60s to the 80s, shaping the golden era of rock and roll."
+        },
+        {
+            "name": "psychedelic rock",
+            "album": "The Doors",
+            "description": "Swirling organs, experimental guitars, and surreal lyrics capture the 60s counterculture, creating dreamlike soundscapes that transport listeners beyond ordinary rock boundaries."
+        },
+        {
+            "name": "metal",
+            "album": "Paranoid",
+            "description": "Explosive distortion, thunderous drums, and intense vocals form a heavy, aggressive style that channels raw energy and darker themes into powerful music."
+        },
+        {
+            "name": "progressive rock",
+            "album": "In The Court Of The Crimson King (Expanded & Remastered Original Album Mix)",
+            "description": "Ambitious compositions with shifting time signatures and varied instrumentation, blending rock with classical and jazz influences to create complex, immersive musical journeys."
+        },
+        {
+            "name": "hard rock",
+            "album": "Who's Next (Deluxe Edition)",
+            "description": "Bold guitar riffs, pounding drums, and soaring vocals deliver raw energy and intensity, bringing rock to its most electrifying and powerful expression."
+        },
+        {
+            "name": "funk rock",
+            "album": "Californication (Deluxe Edition)",
+            "description": "Groovy basslines and syncopated rhythms collide with gritty guitars, creating a high-energy blend of funk’s rhythm and rock’s fiery edge."
+        },
+        {
+            "name": "alternative rock",
+            "album": "The Bends",
+            "description": "Inventive sounds and emotional lyrics break from mainstream formulas, offering edgy guitars, fresh ideas, and a balance of vulnerability and raw energy."
+        },
+        {
+            "name": "industrial metal",
+            "album": "The Downward Spiral",
+            "description": "Mechanical rhythms, distorted guitars, and electronic noise merge into an abrasive, dystopian soundscape that feels both futuristic and intensely aggressive."
+        },
+        {
+            "name": "grunge",
+            "album": "In Utero (Deluxe Edition)",
+            "description": "Distorted guitars, gritty vocals, and unpolished production express raw emotion, capturing frustration, alienation, and honesty at the heart of 90s rock."
+        },
+        {
+            "name": "yacht rock",
+            "album": "Breakfast In America (Deluxe Edition)",
+            "description": "Smooth melodies, polished arrangements, and breezy harmonies create a relaxed, radio-friendly style perfect for warm nights, coastal drives, and easy listening."
+        },
+        {
+            "name": "blues rock",
+            "album": "Wheels Of Fire",
+            "description": "Soulful guitar solos, blues scales, and heartfelt vocals meet amplified energy, blending traditional blues emotion with the power and drive of rock."
+        },
+        {
+            "name": "art rock",
+            "album": "OK Computer",
+            "description": "Ambitious concepts, experimental sounds, and unconventional structures push rock into artistic territory, crafting music that’s challenging, thought-provoking, and creatively bold."
+        }
+    ]
+}

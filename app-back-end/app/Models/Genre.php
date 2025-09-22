@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Enum\GenreTypeEnum;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,13 +10,13 @@ class Genre extends Model
 {
     protected $guarded = ['id'];
 
-    public function songs(): BelongsToMany
+    public function artists(): BelongsToMany
     {
-        return $this->belongsToMany(Song::class);
+        return $this->belongsToMany(Artist::class);
     }
 
-//    public function showcased_album(): BelongsTo
-//    {
-//        return $this->belongsTo(Album::class);
-//    }
+    public function album(): BelongsTo
+    {
+        return $this->belongsTo(Album::class);
+    }
 }

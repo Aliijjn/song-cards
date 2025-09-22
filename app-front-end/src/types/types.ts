@@ -34,6 +34,8 @@ export type GenreDTO = {
   id: number;
   name: string;
   description: string;
+  song_count: number;
+  // description: string;
   showcased_album: string;
-  genre_type: "genre" | "decade";
+  // genre_type: "genre" | "decade";
 }

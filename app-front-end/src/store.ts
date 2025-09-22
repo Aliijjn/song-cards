@@ -8,8 +8,11 @@ export const useSongStore = defineStore("songStore", () => {
     const highScore = ref<number>(0);
 
     const genres = ref<GenreDTO[]>([]);
-    const decades = ref<GenreDTO[]>([]);
-    const selectedGenreId = ref<number | null>(null);
+    // const decades = ref<GenreDTO[]>([]);
+    const selectedGenre = ref<GenreDTO | null>(null);
+    const startMatchModal = ref<boolean>(false);
+
+    const difficulty = ref<number>(75);
 
     async function fetchGenres() {
         try {
@@ -21,11 +24,11 @@ export const useSongStore = defineStore("songStore", () => {
             }
 
             for (const genre of (await response.json()) as GenreDTO[]) {
-                if (genre.genre_type === "genre") {
+                // if (genre.genre_type === "genre") {
                     genres.value.push(genre);
-                } else {
-                    decades.value.push(genre);
-                }
+                // } else {
+                //     decades.value.push(genre);
+                // }
             }
         } catch (err) {
             console.error(err);
@@ -38,8 +41,11 @@ export const useSongStore = defineStore("songStore", () => {
         highScore,
 
         genres,
-        decades,
+        // decades,
         fetchGenres,
-        selectedGenreId,
+        selectedGenre,
+        startMatchModal,
+
+        difficulty,
     };
 });

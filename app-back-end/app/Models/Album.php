@@ -23,10 +23,10 @@ class Album extends Model
 
     public function artist(): BelongsToMany
     {
-        return $this->BelongsToMany(Artist::class);
+        return $this->belongsToMany(Artist::class);
     }
     public function songs(): HasMany
     {
-        return $this->HasMany(Song::class);
+        return $this->hasMany(Song::class);
     }
 }

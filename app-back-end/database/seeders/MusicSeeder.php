@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enum\GenreTypeEnum;
 use App\Models\Album;
 use App\Models\Artist;
+use App\Models\Genre;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Database\Seeder;
@@ -38,7 +39,6 @@ class MusicSeeder extends Seeder
     {
         $artistsData = collect($artistsData)->keyBy('name');
         $artists = $artists->reject(function ($artist) use ($artistsData) {
-            ray($artist['name'], $artistsData[$artist['name']]['edits']['delete'] ?? false);
             return ($artistsData[$artist['name']]['edits']['delete'] ?? false) === true;
         })->toArray();
 
@@ -49,16 +49,11 @@ class MusicSeeder extends Seeder
                     continue;
                 }
                 if (! isset($artist[$editKey])) {
-                    ray($editKey, $editValue, $artist)->label('invalid insertion')->orange();
                     continue;
                 }
-                ray($artist[$editKey], $editValue, $artist)->label('insertion')->blue();
                 $artist[$editKey] = $editValue;
-//                ray($artist)->label('artist');
             }
         }
-        ray($artists)->label('artists');
-
         $artists = collect($artists);
     }
 
@@ -72,22 +67,43 @@ class MusicSeeder extends Seeder
         $token = $response->json()['access_token'];
 
         $file = File::get(database_path("seeders/data/artists.json"));
-        $artistsToQuery = json_decode($file, true)['artists'];
+        $artistsToQuery = collect(json_decode($file, true)['artists'])->unique('name');
+
+        $responses = Http::pool(function ($pool) use ($artistsToQuery, $token) {
+            foreach ($artistsToQuery as $artist) {
+                if (($artist['edits']['delete'] ?? false) === true) {
+                    continue;
+                }
+
+                $pool->withToken($token)
+                    ->get('https://api.spotify.com/v1/search', [
+                        'q'     => $artist['name'],
+                        'type'  => 'artist',
+                        'limit' => 1,
+                    ]);
+            }
+        });
 
         $artists = collect();
-        foreach ($artistsToQuery as $artist) {
-            if (($artist['edits']['delete'] ?? false) === true) {
-                continue;
+        foreach ($responses as $response) {
+            if ($response->successful()) {
+                $artists->push($response->json()['artists']['items'][0]);
             }
-            $response = Http::withToken($token)
-                ->get('https://api.spotify.com/v1/search', [
-                    'q'     => $artist['name'],
-                    'type'  => 'artist',
-                    'limit' => 1,
-                ]);
-            $artists->push($response->json()['artists']['items'][0]);
         }
-        $artists = $artists->keyBy('id');
+
+//        foreach ($artistsToQuery as $artist) {
+//            if (($artist['edits']['delete'] ?? false) === true) {
+//                continue;
+//            }
+//            $response = Http::withToken($token)
+//                ->get('https://api.spotify.com/v1/search', [
+//                    'q'     => $artist['name'],
+//                    'type'  => 'artist',
+//                    'limit' => 1,
+//                ]);
+//            $artists->push($response->json()['artists']['items'][0]);
+//        }
+//        $artists = $artists->keyBy('id');
 
         $songs = collect();
         foreach ($artists as $artist) {
@@ -106,7 +122,9 @@ class MusicSeeder extends Seeder
             })
             ->keyBy('id');
 
-        $artists = $artists->merge($newArtists);
+        $artists = $artists
+            ->merge($newArtists)
+            ->keyBy('id');
         $this->editArtists($artists, $artistsToQuery);
 
         $albums = $songs->pluck('album')
@@ -119,6 +137,7 @@ class MusicSeeder extends Seeder
             ->pluck('genres')
             ->flatten()
             ->unique()
+            ->map(fn ($name) => ['name' => $name])
             ->values();
 
         return [
@@ -174,7 +193,16 @@ class MusicSeeder extends Seeder
             }
         }
 
-        $chunks = $albumArtistEntries->chunk(self::BATCH_SIZE);
+        $chunks = $albumArtistEntries
+            ->filter(function ($albumArtistEntry) {
+                $filter = Album::whereKey($albumArtistEntry['album_id'])->exists()
+                    && Artist::whereKey($albumArtistEntry['artist_id'])->exists();
+                if (! $filter) {
+//                    ray($albumArtistEntry)->label("invalid album-artist entry")->orange();
+                }
+                return $filter;
+            })
+            ->chunk(self::BATCH_SIZE);
         foreach ($chunks as $chunk) {
             DB::table('album_artist')->insert(
                 $chunk->map(fn ($albumArtist) => [
@@ -199,6 +227,7 @@ class MusicSeeder extends Seeder
                     'duration_ms'  => $song['duration_ms'],
                     'popularity'   => $song['popularity'],
                     'track_number' => $song['track_number'],
+                    'release_date' => $song['release_date'] ?? null,
                     'created_at'   => $now,
                 ])->toArray()
             );
@@ -218,6 +247,8 @@ class MusicSeeder extends Seeder
             }
         }
 
+//        ray($artistSongEntries, $songs)->orange();
+
         $chunks = $artistSongEntries->chunk(self::BATCH_SIZE);
         foreach ($chunks as $chunk) {
             DB::table('artist_song')->insert(
@@ -236,8 +267,10 @@ class MusicSeeder extends Seeder
         foreach ($chunks as $chunk) {
             DB::table('genres')->insert(
                 $chunk->map(fn ($genre) => [
-                    'name'       => $genre,
-                    'created_at' => $now,
+                    'name'        => $genre['name'],
+                    'album_id'    => $genre['album_id'] ?? null,
+                    'description' => $genre['description'] ?? null,
+                    'created_at'  => $now,
                 ])->toArray()
             );
         }
@@ -245,7 +278,7 @@ class MusicSeeder extends Seeder
         // Artist <-> Genre
 
         $genreData = DB::table('genres')
-            ->whereIn('name', $genres)
+            ->whereIn('name', $genres->pluck('name')->toArray())
             ->pluck('id', 'name');
 
         $artistGenreEntries = collect();
@@ -258,7 +291,16 @@ class MusicSeeder extends Seeder
             }
         }
 
-        $chunks = $artistGenreEntries->chunk(self::BATCH_SIZE);
+        $chunks = $artistGenreEntries
+            ->filter(function ($artistGenreEntry) {
+                $filter = Artist::whereKey($artistGenreEntry['artist_id'])->exists()
+                    && Genre::whereKey($artistGenreEntry['genre_id'])->exists();
+                if (! $filter) {
+//                    ray($artistGenreEntry)->label("invalid artist-genre entry")->orange();
+                }
+                return $filter;
+            })
+            ->chunk(self::BATCH_SIZE);
         foreach ($chunks as $chunk) {
             DB::table('artist_genre')->insert(
                 $chunk->map(fn ($artistGenre) => [
@@ -270,6 +312,64 @@ class MusicSeeder extends Seeder
         }
     }
 
+    private function editSongs(Collection &$songs): void
+    {
+        $file = File::get(database_path("seeders/data/songs.json"));
+        $songMutations = collect(json_decode($file, true)['songs'])
+            ->keyBy('name');
+//        ray($songMutations);
+
+        $songs = $songs->map(function ($song) use ($songMutations) {
+            $edits = $songMutations[$song['name']]['edits'] ?? [];
+            foreach ($edits as $editKey => $edit) {
+                if (! isset($song[$editKey])) {
+                    ray($edits)->label('invalid insert')->orange();
+                    continue;
+                }
+//                ray('edit', $edit, $editKey);
+                $song[$editKey] = $edit;
+            }
+            return $song;
+        });
+    }
+
+    private function editAlbums(Collection &$albums): void
+    {
+        $file = File::get(database_path("seeders/data/albums.json"));
+        $albumMutations = collect(json_decode($file, true)['albums'])
+            ->keyBy('name');
+
+        $albums = $albums->map(function ($album) use ($albumMutations) {
+            $edits = $albumMutations[$album['name']]['edits'] ?? [];
+            foreach ($edits as $editKey => $edit) {
+                if (! isset($album[$editKey])) {
+                    ray($edits)->label('invalid insert')->orange();
+                    continue;
+                }
+                $album[$editKey] = $edit;
+            }
+            return $album;
+        });
+    }
+
+    private function editGenres(Collection &$genres, Collection $albums): void
+    {
+        $file = File::get(database_path("seeders/data/genres.json"));
+        $genreMutations = collect(json_decode($file, true)['genres'])
+            ->keyBy('name');
+        $albums = $albums->keyBy('name');
+
+        $genres = $genres->map(function ($genre) use ($genreMutations, $albums) {
+            // Fuck it, I'm keeping the monstrosity
+            if ($genreMutations->has($genre['name']) && isset($genreMutations[$genre['name']]['album']) && isset($albums[$genreMutations[$genre['name']]['album']]['id'])) {
+                $genre['album_id'] = $albums[$genreMutations[$genre['name']]['album']]['id'];
+                $genre['description'] = $genreMutations[$genre['name']]['description'];
+            }
+
+            return $genre;
+        });
+    }
+
     public function run(): void
     {
         DB::transaction(function () {
@@ -279,11 +379,19 @@ class MusicSeeder extends Seeder
             [$genres, $artists, $albums, $songs] = $this->fetchData();
             $now = CarbonImmutable::now();
 
+            // Late Edits
+            $this->editAlbums($albums);
+            $this->editSongs($songs);
+            // Needs to be last
+            $this->editGenres($genres, $albums);
+
             // Print
             ray($genres)->label('genres');
             ray($artists)->label('artists');
             ray($albums)->label('albums');
             ray($songs)->label('songs');
+
+//            ray($albums['2rCS6Xwx32V27pvgFzLzlT'] ?? ':)', $artists['0WwSkZ7LtFUFjGjMZBMt6T'])->red();
 
             // To DB
             $this->insertArtists($artists, $now);

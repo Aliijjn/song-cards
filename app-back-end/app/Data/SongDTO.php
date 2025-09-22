@@ -21,11 +21,11 @@ class SongDTO extends Data
     {
         return new self(
             $song->name,
-            $song->artist->pluck("name") ?: collect('Unknown Artist'),
+            $song->artists?->pluck("name") ?: collect('Unknown Artist'),
             $song->album->name,
             $song->album->album_cover_url,
             $song->duration_ms / 1000,
-            $song->album->release_date,
+            $song->release_date ?? $song->album->release_date,
         );
     }
 }
