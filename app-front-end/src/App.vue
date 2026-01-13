@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import { useSongStore } from "./store.ts";
+import HeaderBar from "@/src/general/HeaderBar.vue";
+import Home from "@/src/pages/home/Home.vue";
+import {useBaseStore} from "@/stores/baseStore.ts";
+import Game from "@/src/pages/game/Game.vue";
+import Lost from "@/src/pages/lost/Lost.vue";
 
-import Start from './pages/Start.vue'
-import Quiz from './pages/Quiz.vue'
-import Lost from './pages/Lost.vue'
+// ============================================================================
 
-//=============================================================================
-
-const store = useSongStore();
-
+const baseStore = useBaseStore();
 </script>
 
 <template>
-  <v-app>
-    <v-main class="mx-auto bg-surface pa-4" style="width: 1440px;">
-      <start v-if="store.gameState === 'start'" />
-      <quiz v-else-if="store.gameState === 'playing'" />
-      <lost v-else />
-    </v-main>
-  </v-app>
+  <HeaderBar />
+  <div class="flex justify-center bg-background px-5 pb-5">
+    <div style="max-width: 1080px">
+      <Home v-if="baseStore.gameState === 'start'" />
+      <Game v-else-if="baseStore.gameState === 'playing'" />
+      <Lost v-else-if="baseStore.gameState === 'lost'" />
+      <span v-else> This shouldn't ever happen </span>
+    </div>
+  </div>
 </template>
