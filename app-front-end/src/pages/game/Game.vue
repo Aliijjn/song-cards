@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ref, onMounted } from "vue";
 import { useBaseStore } from "@/stores/baseStore.ts";
 import { useSongStore } from "@/stores/songStore.ts";
-import SongCard from "@/src/pages/game/SongCard.vue";
-import type { SongCardState } from "@/src/types/types.ts";
+import SongCard from "@/pages/game/SongCard.vue";
+import type { SongCardState } from "@/types/types.ts";
+import { router } from "@/router.ts";
 
 // ============================================================================
 
@@ -36,7 +36,7 @@ async function clickCard(index: number) {
     baseStore.highScore = Math.max(baseStore.highScore, baseStore.prevScore);
     songCardState.value = 'incorrect'
     setTimeout(() => {
-      baseStore.gameState = 'lost'
+      router.push('/game/lost')
     }, 3000)
   }
 }
@@ -44,15 +44,17 @@ async function clickCard(index: number) {
 
 <template>
   <div class="flex flex-col">
-    <CardTitle v-html="songStore.currentComparison?.description" class="mb-5" />
-    <CardHeader v-if="songStore.currentSongs === null"> No songs available, please try again </CardHeader>
-    <div v-else class="flex flex-row gap-5">
-      <song-card v-for="(song, i) in songStore.currentSongs" :key="i" :index="i" :status="songCardState" @click="clickCard(i)" />
+    <span v-html="songStore.currentComparison?.description" class="mb-8 text-4xl" />
+
+    <span v-if="songStore.currentSongs === null" class="text-xl">
+      No songs available, please try again
+    </span>
+    <div v-else class="flex flex-row gap-[2em]">
+      <song-card v-for="(_, i) in songStore.currentSongs" :key="i" :index="i" :status="songCardState" @click="clickCard(i)" />
     </div>
-    <div class="flex justify-end mt-3">
-      <CardDescription>
-        Score: {{ currentScore }}
-      </CardDescription>
+
+    <div class="text-end text-xl opacity-60 mt-4">
+      Score: {{ currentScore }}
     </div>
   </div>
 </template>

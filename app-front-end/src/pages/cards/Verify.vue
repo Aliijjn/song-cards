@@ -1,0 +1,134 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { useCardStore } from "@/pages/cards/cardStore.ts";
+import type { SongCardDTO } from "@/types/types.ts";
+import { Table, TableBody, TableCell, TableEmpty, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Pencil } from 'lucide-vue-next';
+import EditSongCardDialog from "@/pages/cards/components/EditSongCardDialog.vue";
+import { router } from "@/router.ts";
+
+type ResponseType = {
+  valid: SongCardDTO[];
+  invalid: SongCardDTO[];
+}
+
+const cardStore = useCardStore();
+
+const isLoading = ref(true)
+const validCards = ref<SongCardDTO[]>([])
+const invalidCards = ref<SongCardDTO[]>([])
+
+const isEditing = ref(false)
+const editedCardIndex = ref<number | null>(null)
+
+onMounted(async () => {
+  const response = await fetch("https://localhost:8001/api/cards/data", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      playlist_ids: cardStore.selectedPlaylists,
+    }),
+  });
+  if (response.ok) {
+    const { valid, invalid } = (await response.json()) as ResponseType;
+
+    validCards.value = valid;
+    invalidCards.value = invalid;
+    cardStore.selectedSongCards = JSON.parse(JSON.stringify(validCards.value));
+  }
+  isLoading.value = false
+});
+
+function toggleSongCard(songCard: SongCardDTO) {
+  if (cardStore.selectedSongCards.findIndex((sc) => sc.id === songCard.id) !== -1) {
+    cardStore.selectedSongCards = cardStore.selectedSongCards.filter((sc) => sc.id !== songCard.id);
+  } else {
+    cardStore.selectedSongCards.push(songCard);
+  }
+}
+
+function editSongCard(index: number) {
+  editedCardIndex.value = index;
+  isEditing.value = true
+}
+
+</script>
+
+<template>
+  <EditSongCardDialog v-if="editedCardIndex !== null" v-model="invalidCards[editedCardIndex]" v-model:is-open="isEditing" />
+
+  <div class="flex flex-col gap-5 max-w-[720px]">
+    <div class="flex justify-between">
+      <div>
+        <div class="flex text-3xl">Verify Data</div>
+        <div>These songs likely have some invalid data. You can manually edit and include them before continuing</div>
+      </div>
+    </div>
+
+    <Table>
+      <TableEmpty v-if="isLoading">
+        Loading...
+      </TableEmpty>
+      <TableEmpty v-else-if="!invalidCards.length">
+        No invalid songs found
+      </TableEmpty>
+      <TableBody v-else>
+        <TableRow
+            v-for="(invalidCard, index) in invalidCards"
+            :key="invalidCard.id"
+            class="cursor-pointer"
+            @click="toggleSongCard(invalidCard)"
+        >
+          <TableCell>
+            <div class="flex flex-row items-center gap-3">
+              <Checkbox
+                  :id="invalidCard.id"
+                  :model-value="cardStore.selectedSongCards.includes(invalidCard)"
+                  class="mx-2"
+              />
+              <img
+                  :src="invalidCard.imageUrl"
+                  alt="image"
+                  class="h-15 w-15 rounded object-cover"
+              />
+              <div class="flex flex-col truncate">
+                <div class="font-bold"> {{ invalidCard.name }} </div>
+                <div> {{ invalidCard.artist }} </div>
+              </div>
+            </div>
+          </TableCell>
+
+          <!-- Year -->
+          <TableCell class="pl-12 pr-7">
+            <div class="flex justify-end px-3">
+            </div>
+            {{ invalidCard.release_year }}
+          </TableCell>
+
+          <!-- Actions -->
+          <TableCell class="px-5">
+            <Button class="rounded-full" size="icon" @click="editSongCard(index)">
+              <Pencil />
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </div>
+
+  <div class="apply-button">
+    <Button size="lg" class="rounded-full" @click="router.push('create')"> Continue </Button>
+  </div>
+</template>
+
+<style scoped lang="css">
+.apply-button {
+  position: fixed;
+  bottom: 1rem;
+  margin: 0 auto;
+}
+</style>

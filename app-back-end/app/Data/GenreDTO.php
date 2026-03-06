@@ -18,24 +18,11 @@ class GenreDTO extends Data
 
     public static function fromModel(Genre $genre): self
     {
-//        ray(
-//            $genre,
-//            $genre
-//                ->artists,
-//            $genre
-//                ->artists
-//                ->flatMap(function ($artist) {
-//                    ray($artist->songs);
-//                    return $artist->songs;
-//                })
-//        );
-//        ray($genre->artists->flatMap(fn ($artist) => $artist->songs)->unique('id')->slice(0, 12))->once();
         return new self(
             $genre->id,
             ucwords($genre->name),
             $genre->description,
-            $genre
-                ->artists
+            $genre->artists
                 ->flatMap(fn ($artist) => $artist->songs)
                 ->unique('id')
                 ->count(),

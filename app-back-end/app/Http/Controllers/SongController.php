@@ -26,7 +26,6 @@ class SongController extends Controller
     {
         $genreId = $request->input('genre_id');
         $difficulty = $request->input('difficulty', 75);
-//        ray($genreId, $difficulty);
 
         ray(Song::get()->first()->artists)->label('test');
 

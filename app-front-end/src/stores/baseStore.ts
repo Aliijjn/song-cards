@@ -1,10 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { difficulties, type Difficulty, type GameState, type GenreDTO } from "@/src/types/types.ts";
+import { difficulties, type Difficulty, type GenreDTO } from "@/types/types.ts";
 
 export const useBaseStore = defineStore("baseStore", () => {
-    const gameState = ref<GameState>('start');
-
     const prevScore = ref<number>(0);
     const highScore = ref<number>(0);
 
@@ -37,9 +35,6 @@ export const useBaseStore = defineStore("baseStore", () => {
     }
 
     return {
-        gameState,
-
-
         prevScore,
         highScore,
 
