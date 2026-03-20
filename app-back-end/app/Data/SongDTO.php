@@ -6,6 +6,9 @@ use App\Models\Song;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Carbon\CarbonImmutable;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
 class SongDTO extends Data
 {
     public function __construct(

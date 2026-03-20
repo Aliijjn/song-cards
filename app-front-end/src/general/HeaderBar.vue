@@ -4,6 +4,7 @@ import { useColorMode } from "@vueuse/core";
 import { Switch } from "@/components/ui/switch";
 import { Moon, Sun } from 'lucide-vue-next';
 import { router } from "@/router.ts";
+import { Separator} from "@/components/ui/separator";
 
 const theme = computed({
   get: () => useColorMode().value === 'dark',

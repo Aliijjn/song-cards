@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from 'lucide-vue-next';
 import EditSongCardDialog from "@/pages/cards/components/EditSongCardDialog.vue";
 import { router } from "@/router.ts";
+import {getCardData} from "@/pages/cards/api.ts";
 
 type ResponseType = {
   valid: SongCardDTO[];
@@ -24,21 +25,15 @@ const isEditing = ref(false)
 const editedCardIndex = ref<number | null>(null)
 
 onMounted(async () => {
-  const response = await fetch("https://localhost:8001/api/cards/data", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      playlist_ids: cardStore.selectedPlaylists,
-    }),
-  });
-  if (response.ok) {
-    const { valid, invalid } = (await response.json()) as ResponseType;
+  const response = await getCardData(cardStore.selectedPlaylists);
+  if (response.status === "success") {
+    const { valid, invalid } = response.value;
 
     validCards.value = valid;
     invalidCards.value = invalid;
     cardStore.selectedSongCards = JSON.parse(JSON.stringify(validCards.value));
+  } else {
+    console.error("Unable to get card data", response.message);
   }
   isLoading.value = false
 });
@@ -111,7 +106,7 @@ function editSongCard(index: number) {
 
           <!-- Actions -->
           <TableCell class="px-5">
-            <Button class="rounded-full" size="icon" @click="editSongCard(index)">
+            <Button size="icon" @click="editSongCard(index)">
               <Pencil />
             </Button>
           </TableCell>
@@ -121,7 +116,7 @@ function editSongCard(index: number) {
   </div>
 
   <div class="apply-button">
-    <Button size="lg" class="rounded-full" @click="router.push('create')"> Continue </Button>
+    <Button size="lg" @click="router.push('create')"> Continue </Button>
   </div>
 </template>
 

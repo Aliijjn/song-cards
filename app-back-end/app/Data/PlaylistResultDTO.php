@@ -4,7 +4,9 @@ namespace App\Data;
 
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 class PlaylistResultDTO extends Data
 {
     /**

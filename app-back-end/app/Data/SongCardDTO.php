@@ -9,6 +9,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\Data;
 use Carbon\CarbonImmutable;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
 class SongCardDTO extends Data
 {
     const MAX_NAME_LENGTH = 35;

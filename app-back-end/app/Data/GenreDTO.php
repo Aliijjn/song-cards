@@ -5,7 +5,9 @@ namespace App\Data;
 use App\Models\Genre;
 use Illuminate\Support\Facades\DB;
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 class GenreDTO extends Data
 {
     public function __construct(

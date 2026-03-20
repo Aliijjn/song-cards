@@ -53,7 +53,7 @@ async function clickCard(index: number) {
       <song-card v-for="(_, i) in songStore.currentSongs" :key="i" :index="i" :status="songCardState" @click="clickCard(i)" />
     </div>
 
-    <div class="text-end text-xl opacity-60 mt-4">
+    <div class="text-end text-xl text-muted-foreground mt-4">
       Score: {{ currentScore }}
     </div>
   </div>

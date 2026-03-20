@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\ExportDO;
 use App\Data\SongCardDTO;
 use App\Enum\SongErrorEnum;
+use App\Models\Export;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Ramsey\Uuid\Uuid;
 
 ini_set('max_execution_time', '12000');
-class CardController extends Controller
+class ExportController extends Controller
 {
     const CARD_X_COUNT = 3;
     const CARD_PAGE_COUNT = self::CARD_X_COUNT * 4;
@@ -39,7 +41,7 @@ class CardController extends Controller
         ]);
     }
 
-    public function createCards(Request $request): JsonResponse
+    public function runExport(Request $request): JsonResponse
     {
         $request->validate([
             'card_data' => 'required|array',
@@ -84,9 +86,32 @@ class CardController extends Controller
             );
         }
 
+        Export::create([
+            'uuid' => $uuid,
+            'user_id' => User::firstOrFail()->id,
+            'name' => 'test',
+        ]);
+
         return new JsonResponse([
             'preview' => Storage::url("public/$uuid.pdf"),
             'download' => "https://localhost:8001/api/downloads/$uuid",
         ]);
+    }
+
+    public function fetchExports(Request $request): JsonResponse
+    {
+        $user = User::whereId($request->get("user_id"))->firstOrFail();
+        $start = (int) $request->get("start", 0);
+        $length = (int) $request->get("length", 10);
+
+        return new JsonResponse(
+            ExportDO::collect(
+                Export::where('user_id', '=', $user->id)
+                    ->orderByDesc("uuid")
+                    ->skip($start)
+                    ->take($length)
+                    ->get()
+            )
+        );
     }
 }

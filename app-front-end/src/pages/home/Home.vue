@@ -1,18 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardTitle,
-} from '@/components/ui/card'
 import { useBaseStore } from "@/stores/baseStore.ts";
-import type { GenreDTO } from "@/types/types.ts";
 import StartMatchModal from "@/pages/home/StartMatchModal.vue";
 import { Input } from "@/components/ui/input";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Play, FastForward } from 'lucide-vue-next';
+import { Play, FastForward, Search } from 'lucide-vue-next';
 import { router } from "@/router.ts";
+
+import GenreDTO = App.Data.GenreDTO;
 
 //=============================================================================
 
@@ -37,7 +33,7 @@ function openStartMatchModal(genre: GenreDTO | null): void {
 
 <template>
   <StartMatchModal />
-  <div class="flex flex-col gap-20 py-5 w-[1080px]">
+  <div class="flex flex-col gap-20 w-[1080px]">
     <span class="text-5xl"> Higher-Lower </span>
 
     <div class="flex justify-between items-center">
@@ -45,7 +41,7 @@ function openStartMatchModal(genre: GenreDTO | null): void {
         <span class="text-3xl">Quick Match</span>
         <span>Quickly jump into a game of Higher Lower. Features a wide range of popular songs, spanning many decades</span>
       </div>
-      <Button size="lg" class="w-40 h-12 rounded-full" @click="router.push('/game')">
+      <Button size="lg" class="!px-6 h-12" @click="router.push('/game')">
         <FastForward />
         Quick Match
       </Button>
@@ -54,15 +50,17 @@ function openStartMatchModal(genre: GenreDTO | null): void {
     <div class="flex flex-col gap-5">
       <div class="flex justify-between items-center">
         <span class="text-3xl">Genres</span>
-        <Input v-model="genreFilter" placeholder="Search" class="w-60 pl-4 rounded-full" />
+        <Input v-model="genreFilter" placeholder="Search" class="w-60 pl-4">
+          <Search />
+        </Input>
       </div>
       <Carousel>
         <CarouselContent>
           <CarouselItem v-for="genre in visibleGenres" :key="genre.id" class="sm:basis-1 md:basis-1/2 lg:basis-1/4">
             <div class="flex flex-col items-center gap-3 cursor-pointer" @click="openStartMatchModal(genre)">
-              <img :src="genre.showcased_album" :alt="genre.name" class="rounded-2xl" />
+              <img :src="genre.showcased_album" :alt="genre.name" class="rounded-[0.75rem]" />
               <span class="text-ellipsis">{{ genre.name }}</span>
-              <Button class="w-25 rounded-full">
+              <Button class="!px-4">
                 <Play />
                 Play
               </Button>

@@ -10,23 +10,23 @@ const quote = getQuote(baseStore.prevScore);
 </script>
 
 <template>
-  <div class="flex flex-col gap-10">
+  <div class="flex flex-col gap-8">
     <div>
       <div v-html="quote.quote" class="text-4xl" />
-      <div v-html="quote.info" class="text-2xl opacity-60" />
+      <div v-html="quote.info" class="text-2xl text-muted-foreground" />
     </div>
 
-    <div>
-      <div class="text-xl"> Points scored: {{ baseStore.prevScore }} </div>
-      <div class="text-xl"> High Score: {{ baseStore.highScore }} </div>
+    <div class="text-muted-foreground text-xl">
+      <div> Points scored: {{ baseStore.prevScore }} </div>
+      <div> High Score: {{ baseStore.highScore }} </div>
     </div>
 
-    <div class="flex gap-3">
-      <Button size="lg" class="w-40 h-12 rounded-full" @click="router.push('/game')">
+    <div class="flex gap-4">
+      <Button size="lg" class="w-40 h-12" @click="router.push('/game')">
         <Repeat />
         Play Again
       </Button>
-      <Button variant="outline" size="lg" class="w-40 h-12 rounded-full" @click="router.push('/')">
+      <Button variant="outline" size="lg" class="w-40 h-12" @click="router.push('/')">
         <CornerDownLeft />
         Back To Menu
       </Button>

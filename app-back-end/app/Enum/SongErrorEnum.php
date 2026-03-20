@@ -3,7 +3,9 @@
 namespace App\Enum;
 
 use Illuminate\Support\Collection;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 enum SongErrorEnum: int
 {
     case NonStandardAlbumType = 1;

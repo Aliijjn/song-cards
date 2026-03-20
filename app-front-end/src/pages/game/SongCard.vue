@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import {Card, CardDescription, CardTitle} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useSongStore } from "@/stores/songStore.ts";
-import {type SongCardState, type SongDTO} from "@/types/types";
-import { ref, computed } from "vue";
+import { type SongCardState} from "@/types/types";
+import { computed } from "vue";
+
+import SongDTO = App.Data.SongDTO
 
 // ============================================================================
 
@@ -24,11 +26,11 @@ const comparisonResult = computed(
 </script>
 
 <template>
-  <Card class="p-0 gap-0 rounded-2xl">
+  <Card class="p-0 gap-0 overflow-hidden">
     <div class="p-5 flex flex-row justify-between items-center">
       <div class="flex flex-col gap-1">
         <div class="text-2xl">{{ selectedSong.name }}</div>
-        <div class="text-lg opacity-60">{{ selectedSong.artist_name.join(', ') }}</div>
+        <div class="text-xl text-muted-foreground">{{ selectedSong.artist_name.join(', ') }}</div>
       </div>
       <div
           v-if="status !== 'idle'"
@@ -41,7 +43,6 @@ const comparisonResult = computed(
     <img
         :src="selectedSong.album_cover_url"
         :alt="`${selectedSong.album_name} by ${selectedSong.artist_name}`"
-        class="rounded-b-2xl"
     />
   </Card>
 </template>

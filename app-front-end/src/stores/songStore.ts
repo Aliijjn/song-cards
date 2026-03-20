@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { useBaseStore } from "@/stores/baseStore.ts";
 import { ref, computed } from "vue";
 import dayjs from "dayjs";
-import { type Comparison, type SongDTO } from "@/types/types";
+import { type Comparison } from "@/types/types";
+import SongDTO = App.Data.SongDTO;
 
 export const useSongStore = defineStore("songStore", () => {
     const songs = ref<SongDTO[]>([]);

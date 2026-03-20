@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { useBaseStore } from "@/stores/baseStore";
-import { difficulties, type Difficulty, type GenreDTO } from "@/types/types.ts";
+import { difficulties } from "@/types/types.ts";
 import {
   Dialog, DialogClose,
   DialogContent,
@@ -28,10 +27,10 @@ function startMatch() {
 </script>
 
 <template>
-  <Dialog v-model:open="store.startMatchModal" class="rounded-2xl">
+  <Dialog v-model:open="store.startMatchModal">
     <form>
-      <DialogContent class="sm:max-w-[425px] rounded-2xl p-0 gap-0">
-        <DialogHeader class="p-6">
+      <DialogContent class="sm:max-w-[425px]">
+        <DialogHeader>
           <DialogTitle>
             {{ store.selectedGenre?.name ?? "Quick Match" }}
           </DialogTitle>
@@ -41,12 +40,12 @@ function startMatch() {
           <div class="grid gap-4 mt-2">
             <div class="grid gap-2">
               <Label for="difficulty-button">Difficulty</Label>
-              <ButtonGroup id="difficulty-button" class="flex w-full rounded-full">
+              <ButtonGroup id="difficulty-button" class="flex w-full rounded-[8px]">
                 <Button
                     v-for="difficulty in difficulties"
                     :key="difficulty.value"
                     :variant="store.difficulty.name === difficulty.name ? 'default' : 'outline'"
-                    class="flex-1  rounded-full"
+                    class="flex-1  rounded-[8px]"
                     @click="store.difficulty = difficulty"
                 >
                   {{ difficulty.name }}
@@ -58,7 +57,7 @@ function startMatch() {
               <Input
                   id="difficulty-slider"
                   v-model="store.difficulty.value"
-                  class="rounded-full px-4"
+                  class="rounded-[8px] px-4"
                   type="number"
                   :min="0"
                   :max="85"
@@ -68,15 +67,13 @@ function startMatch() {
           </div>
         </DialogHeader>
 
-        <Separator />
-
-        <DialogFooter class="p-3">
+        <DialogFooter>
           <DialogClose as-child>
-            <Button variant="outline" class="rounded-full" @click="store.startMatchModal = false">
+            <Button variant="outline" class="rounded-[8px]" @click="store.startMatchModal = false">
               Cancel
             </Button>
           </DialogClose>
-          <Button type="submit" class="rounded-full" @click="startMatch">
+          <Button type="submit" class="rounded-[8px]" @click="startMatch">
             Start Match
           </Button>
         </DialogFooter>

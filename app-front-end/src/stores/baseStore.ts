@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { difficulties, type Difficulty, type GenreDTO } from "@/types/types.ts";
+import { difficulties, type Difficulty } from "@/types/types.ts";
+import GenreDTO = App.Data.GenreDTO;
 
 export const useBaseStore = defineStore("baseStore", () => {
     const prevScore = ref<number>(0);

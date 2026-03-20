@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\SongController;
 use Illuminate\Support\Facades\Route;
@@ -17,9 +17,10 @@ Route::middleware(['api'])
 
         Route::get('/playlists', [PlaylistController::class, 'index']);
 
-        Route::prefix('cards')->group(function () {
-            Route::post('/data', [CardController::class, 'fetchData']);
-            Route::post('/create', [CardController::class, 'createCards']);
+        Route::prefix('export')->group(function () {
+            Route::post('/data', [ExportController::class, 'fetchData']);
+            Route::post('/', [ExportController::class, 'runExport']);
+            Route::get('/', [ExportController::class, 'fetchExports']);
         });
 
         Route::get('/downloads/{uuid}', function ($uuid) {

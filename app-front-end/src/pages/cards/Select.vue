@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import type { PlaylistDTO, PlaylistResultDTO } from "@/types/types.ts";
+import type { PlaylistDTO } from "@/types/types.ts";
 import { Table, TableBody, TableCell, TableEmpty, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useCardStore } from "@/pages/cards/cardStore.ts";
 import { router } from "@/router.ts";
 import { Input } from "@/components/ui/input";
+import { getPlaylists } from "@/pages/cards/api.ts";
 
 const cardStore = useCardStore();
 
@@ -16,9 +17,9 @@ const playlists = ref<PlaylistDTO[]>([]);
 const isLast = ref(false);
 
 onMounted(async () => {
-  const response = await fetch("https://localhost:8001/api/playlists");
-  if (response.ok) {
-    const data = await response.json() as PlaylistResultDTO;
+  const response = await getPlaylists();
+  if (response.status === "success") {
+    const data = response.value;
 
     playlists.value.push(...data.playlists);
     isLast.value = data.isLast
@@ -54,7 +55,7 @@ function togglePlaylist(id: string) {
       <div class="text-3xl">
         Select playlists
       </div>
-      <Input v-model="search" placeholder="Search" class="w-60 rounded-full" />
+      <Input v-model="search" placeholder="Search" class="w-60" />
     </div>
     <Table class=" max-w-[720px] table-fixed">
       <TableBody v-if="isLoading">
@@ -98,7 +99,7 @@ function togglePlaylist(id: string) {
   </div>
 
   <div v-if="cardStore.selectedPlaylists.length" class="apply-button">
-    <Button size="lg" class="rounded-full" @click="router.push('verify')">
+    <Button size="lg" @click="router.push('verify')">
       Export {{ cardStore.selectedPlaylists.length }} playlist{{ cardStore.selectedPlaylists.length === 1 ? '' : 's'}}
     </Button>
   </div>
