@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\ExportDO;
+use App\Data\ExportDTO;
 use App\Data\SongCardDTO;
 use App\Enum\SongErrorEnum;
 use App\Models\Export;
@@ -92,10 +92,7 @@ class ExportController extends Controller
             'name' => 'test',
         ]);
 
-        return new JsonResponse([
-            'preview' => Storage::url("public/$uuid.pdf"),
-            'download' => "https://localhost:8001/api/downloads/$uuid",
-        ]);
+        return new JsonResponse($uuid);
     }
 
     public function fetchExports(Request $request): JsonResponse
@@ -105,11 +102,12 @@ class ExportController extends Controller
         $length = (int) $request->get("length", 10);
 
         return new JsonResponse(
-            ExportDO::collect(
+            ExportDTO::collect(
                 Export::where('user_id', '=', $user->id)
                     ->orderByDesc("uuid")
                     ->skip($start)
                     ->take($length)
+                    ->with('user')
                     ->get()
             )
         );

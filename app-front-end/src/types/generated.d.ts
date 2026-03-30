@@ -1,7 +1,8 @@
 declare namespace App.Data {
-export type ExportDO = {
+export type ExportDTO = {
 uuid: string;
 user_id: number;
+user_name: string;
 name: string;
 created_at: string;
 updated_at: string;

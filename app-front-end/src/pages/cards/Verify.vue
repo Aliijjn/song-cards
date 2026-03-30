@@ -8,16 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from 'lucide-vue-next';
 import EditSongCardDialog from "@/pages/cards/components/EditSongCardDialog.vue";
 import { router } from "@/router.ts";
-import {getCardData} from "@/pages/cards/api.ts";
-
-type ResponseType = {
-  valid: SongCardDTO[];
-  invalid: SongCardDTO[];
-}
+import {exportCardData, getCardData} from "@/pages/cards/api.ts";
+import {Spinner} from "@/components/ui/spinner";
 
 const cardStore = useCardStore();
 
 const isLoading = ref(true)
+const isCreatingCards = ref(false);
 const validCards = ref<SongCardDTO[]>([])
 const invalidCards = ref<SongCardDTO[]>([])
 
@@ -39,6 +36,8 @@ onMounted(async () => {
 });
 
 function toggleSongCard(songCard: SongCardDTO) {
+  if (isCreatingCards.value) return;
+
   if (cardStore.selectedSongCards.findIndex((sc) => sc.id === songCard.id) !== -1) {
     cardStore.selectedSongCards = cardStore.selectedSongCards.filter((sc) => sc.id !== songCard.id);
   } else {
@@ -51,6 +50,15 @@ function editSongCard(index: number) {
   isEditing.value = true
 }
 
+async function startExport() {
+  isCreatingCards.value = true
+  const response = await exportCardData(cardStore.selectedSongCards)
+  if (response.status === "success") {
+    const uuid = response.value;
+    router.push(`/cards/preview/${uuid}`);
+  }
+  isCreatingCards.value = false
+}
 </script>
 
 <template>
@@ -65,8 +73,14 @@ function editSongCard(index: number) {
     </div>
 
     <Table>
-      <TableEmpty v-if="isLoading">
-        Loading...
+      <TableEmpty v-if="isCreatingCards">
+        <div class="flex gap-2">
+          <div> Creating cards, this might take a while </div>
+          <Spinner class="size-10" />
+        </div>
+      </TableEmpty>
+      <TableEmpty v-else-if="isLoading">
+        <Spinner class="size-10" />
       </TableEmpty>
       <TableEmpty v-else-if="!invalidCards.length">
         No invalid songs found
@@ -75,7 +89,6 @@ function editSongCard(index: number) {
         <TableRow
             v-for="(invalidCard, index) in invalidCards"
             :key="invalidCard.id"
-            class="cursor-pointer"
             @click="toggleSongCard(invalidCard)"
         >
           <TableCell>
@@ -83,6 +96,7 @@ function editSongCard(index: number) {
               <Checkbox
                   :id="invalidCard.id"
                   :model-value="cardStore.selectedSongCards.includes(invalidCard)"
+                  :disabled="isCreatingCards"
                   class="mx-2"
               />
               <img
@@ -106,7 +120,7 @@ function editSongCard(index: number) {
 
           <!-- Actions -->
           <TableCell class="px-5">
-            <Button size="icon" @click="editSongCard(index)">
+            <Button size="icon" variant="outline" :disabled="isCreatingCards" @click="editSongCard(index)">
               <Pencil />
             </Button>
           </TableCell>
@@ -116,7 +130,7 @@ function editSongCard(index: number) {
   </div>
 
   <div class="apply-button">
-    <Button size="lg" @click="router.push('create')"> Continue </Button>
+    <Button size="lg" :disabled="isCreatingCards" @click="startExport"> Create Cards </Button>
   </div>
 </template>
 

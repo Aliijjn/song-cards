@@ -6,8 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useCardStore } from "@/pages/cards/cardStore.ts";
 import { router } from "@/router.ts";
-import { Input } from "@/components/ui/input";
 import { getPlaylists } from "@/pages/cards/api.ts";
+import SearchBar from "@/general/SearchBar.vue";
 
 const cardStore = useCardStore();
 
@@ -55,7 +55,7 @@ function togglePlaylist(id: string) {
       <div class="text-3xl">
         Select playlists
       </div>
-      <Input v-model="search" placeholder="Search" class="w-60" />
+      <SearchBar v-model="search" />
     </div>
     <Table class=" max-w-[720px] table-fixed">
       <TableBody v-if="isLoading">

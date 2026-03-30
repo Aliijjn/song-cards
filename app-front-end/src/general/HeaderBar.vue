@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useColorMode } from "@vueuse/core";
 import { Switch } from "@/components/ui/switch";
 import { Moon, Sun } from 'lucide-vue-next';
 import { router } from "@/router.ts";
-import { Separator} from "@/components/ui/separator";
 
 const theme = computed({
   get: () => useColorMode().value === 'dark',
@@ -20,6 +19,7 @@ const theme = computed({
     <div class="flex justify-center gap-10">
       <div class="cursor-pointer" @click="router.push('/')"> Higher Lower </div>
       <div class="cursor-pointer" @click="router.push('/cards')"> Game Cards </div>
+      <div class="cursor-pointer" @click="router.push('/curations')"> Curations </div>
     </div>
     <div class="flex justify-end items-center gap-2">
       <Sun v-if="!theme" class="h-5 w-5" />
