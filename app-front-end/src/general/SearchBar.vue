@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {InputGroup, InputGroupAddon, InputGroupInput} from "@/components/ui/input-group";
-import {Search} from "lucide-vue-next";
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Search } from 'lucide-vue-next';
 
-const search = defineModel<string>()
+const search = defineModel<string>();
 </script>
 
 <template>
-  <InputGroup v-bind="$props" class="w-60">
+  <InputGroup v-bind="$props" class="w-60 my-1">
     <InputGroupInput v-model="search" placeholder="Search" />
     <InputGroupAddon>
       <Search />

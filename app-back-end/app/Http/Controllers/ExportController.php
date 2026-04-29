@@ -87,7 +87,7 @@ class ExportController extends Controller
         }
 
         Export::create([
-            'uuid' => $uuid,
+            'id' => $uuid,
             'user_id' => User::firstOrFail()->id,
             'name' => 'test',
         ]);

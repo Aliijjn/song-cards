@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function index(): RedirectResponse
     {
         return redirect()->away(
-            'https://accounts.spotify.com/authorize?'.http_build_query([
+            'https://accounts.spotify.com/authorize?' . http_build_query([
                 'response_type' => 'code',
                 'client_id' => env('SPOTIFY_CLIENT_ID'),
                 'redirect_uri' => 'https://127.0.0.1:8001/api/callback',
@@ -36,13 +36,15 @@ class AuthController extends Controller
         ray($response->json());
         $data = $response->json();
 
+        ray($data, now(), now()->addSeconds($data['expires_in']));
+
         User::first()->update([
             'spotify_access_token' => $data['access_token'],
             'spotify_refresh_token' => $data['refresh_token'],
             'spotify_expires_at' => now()->addSeconds($data['expires_in']),
         ]);
 
-        return redirect()->away(env('FRONTEND_URL').'/cards/select');
+        return redirect()->away(env('FRONTEND_URL'));
     }
 
 }

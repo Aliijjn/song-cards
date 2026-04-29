@@ -1,6 +1,30 @@
 declare namespace App.Data {
+export type CurationCopyDTO = {
+name: string;
+description: string | null;
+userId: number;
+maxSongCount: number | null;
+};
+export type CurationCreationDTO = {
+name: string;
+description: string | null;
+userId: number;
+playlistIds: Array<any>;
+};
+export type CurationDTO = {
+id: string;
+name: string;
+description: string | null;
+createdBy: string;
+updatedAt: string;
+songs: Array<any>;
+};
+export type CurationUpdateDTO = {
+name: string;
+description: string | null;
+};
 export type ExportDTO = {
-uuid: string;
+id: string;
 user_id: number;
 user_name: string;
 name: string;
@@ -36,11 +60,18 @@ errors: Array<any>;
 imageUrl: string;
 };
 export type SongDTO = {
+id: string;
 name: string;
 artist_name: Array<any>;
 album_name: string;
-album_cover_url: string;
+albumCoverUrl: string | null;
 duration_seconds: number;
+release_date: string;
+errors: Array<any>;
+};
+export type SongEditCreationDTO = {
+song_id: string;
+name: string;
 release_date: string;
 };
 }

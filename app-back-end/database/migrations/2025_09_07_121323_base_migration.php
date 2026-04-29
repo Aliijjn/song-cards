@@ -4,9 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    const BASE_62_ID_LENGTH = 22;
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,63 +15,56 @@ return new class extends Migration
             // All the tables with actual content:
 
             Schema::create('genres', function (Blueprint $table) {
-                $table->id();
+                $table->uuid('id')->primary();
                 $table->string('name');
-                $table->string('album_id', self::BASE_62_ID_LENGTH)
-                    ->nullable();
-                $table->foreign('album_id')
-                    ->references('id')
-                    ->on('albums')
-                    ->nullOnDelete();
-                $table->text('description')
-                    ->nullable();
                 $table->timestamps();
             });
 
             Schema::create('artists', function (Blueprint $table) {
-                $table->string('id', self::BASE_62_ID_LENGTH)->primary();
+                $table->uuid('id')->primary();
+                $table->string('spotify_id')->unique();
                 $table->string('name');
-                $table->string('spotify_url');
                 $table->timestamps();
+
+                $table->index('spotify_id');
             });
 
             Schema::create('albums', function (Blueprint $table) {
-                $table->string('id', self::BASE_62_ID_LENGTH)->primary();
+                $table->uuid('id')->primary();
+                $table->string('spotify_id')->unique();
                 $table->string('name');
-                $table->string('spotify_url')->nullable();
-                $table->string('album_cover_url');
-                $table->dateTime('release_date');
+                $table->string('type');
+                $table->string('release_date'); // cannot be a datetime because of inconsistent formatting
                 $table->string('release_date_precision');
                 $table->integer('total_tracks');
                 $table->timestamps();
+
+                $table->index('spotify_id');
             });
 
             Schema::create('songs', function (Blueprint $table) {
-                $table->string('id', self::BASE_62_ID_LENGTH)->primary();
+                $table->uuid('id')->primary();
+                $table->string('spotify_id')->unique();
                 $table->string('name');
-                $table->string('spotify_url');
-                $table->string('album_id', self::BASE_62_ID_LENGTH);
-                $table->foreign('album_id')
-                    ->references('id')
-                    ->on('albums')
+                $table->foreignUuid('album_id')
+                    ->constrained()
                     ->cascadeOnDelete();
                 $table->integer('duration_ms');
                 $table->integer('popularity');
                 $table->integer('track_number');
-                $table->dateTime('release_date')
-                    ->nullable();
+                $table->jsonb('errors');
                 $table->timestamps();
+
+                $table->index('spotify_id');
             });
 
             // Pivot tables:
 
             Schema::create('artist_genre', function (Blueprint $table) {
-                $table->string('artist_id', self::BASE_62_ID_LENGTH);
-                $table->foreign('artist_id')
-                    ->references('id')
-                    ->on('artists')
+                $table->foreignUuid('artist_id')
+                    ->constrained()
                     ->cascadeOnDelete();
-                $table->foreignId('genre_id')
+                $table->foreignUuid('genre_id')
                     ->constrained()
                     ->cascadeOnDelete();
                 $table->timestamps();
@@ -82,15 +73,11 @@ return new class extends Migration
             });
 
             Schema::create('album_artist', function (Blueprint $table) {
-                $table->string('album_id', self::BASE_62_ID_LENGTH);
-                $table->foreign('album_id')
-                    ->references('id')
-                    ->on('albums')
+                $table->foreignUuid('album_id')
+                    ->constrained()
                     ->cascadeOnDelete();
-                $table->string('artist_id', self::BASE_62_ID_LENGTH);
-                $table->foreign('artist_id')
-                    ->references('id')
-                    ->on('artists')
+                $table->foreignUuid('artist_id')
+                    ->constrained()
                     ->cascadeOnDelete();
                 $table->timestamps();
 
@@ -98,20 +85,15 @@ return new class extends Migration
             });
 
             Schema::create('artist_song', function (Blueprint $table) {
-                $table->string('artist_id', self::BASE_62_ID_LENGTH);
-                $table->foreign('artist_id')
-                    ->references('id')
-                    ->on('artists')
+                $table->foreignUuid('artist_id')
+                    ->constrained()
                     ->cascadeOnDelete();
-                $table->string('song_id', self::BASE_62_ID_LENGTH);
-                $table->foreign('song_id')
-                    ->references('id')
-                    ->on('songs')
+                $table->foreignUuid('song_id')
+                    ->constrained()
                     ->cascadeOnDelete();
                 $table->timestamps();
 
                 $table->unique(['artist_id', 'song_id']);
-
             });
 
         });

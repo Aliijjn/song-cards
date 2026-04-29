@@ -21,30 +21,25 @@ class SongCardDTO extends Data
      * @param Collection<SongErrorEnum> $errors
      */
     public function __construct(
-        public string $id,
-        public string $name,
-        public string $artist,
-        public int $release_year,
-        public string $url,
-        public string $color,
+        public string     $id,
+        public string     $name,
+        public string     $artist,
+        public int        $release_year,
+        public string     $url,
+        public string     $color,
         public Collection $errors,
-        public string $imageUrl,
-    ) {}
+        public string     $imageUrl,
+    )
+    {
+    }
 
     private static function parseName(string $name): string
     {
         $clutter = ['remaster', 'original', 'raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit'];
 
-        $name = collect(preg_split('#(?=[\(\-/])#', $name))
-            ->filter(fn (string $name) => ! Str::contains(Str::lower($name), $clutter))
+        return collect(preg_split('#(?=[\(\-/])#', $name))
+            ->filter(fn(string $name) => !Str::contains(Str::lower($name), $clutter))
             ->join('');
-
-        return $name;
-        /*
-         * strlen($name) > self::MAX_NAME_LENGTH
-            ? substr($name, 0, self::MAX_NAME_LENGTH - 2).'...'
-            : $name;
-         */
     }
 
     /**

@@ -44,8 +44,8 @@ watch([start, length], async () => {
         </TableEmpty>
         <TableRow
             v-for="e in exports"
-            :key="e.uuid"
-            @click="router.push(`cards/preview/${e.uuid}`)"
+            :key="e.id"
+            @click="router.push(`cards/preview/${e.id}`)"
             class="max-w-[1080px]"
         >
           <TableCell class="flex flex-row items-center gap-3">
