@@ -3,6 +3,7 @@
 
 
 ## How the application works
+(note: background gradient doesn't work because Firefox)
 1. Make sure you're logged in through Spotify. Go to "Curations" in the top-right and click "Create Curation"
 <img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/46423851-a898-4989-b0bc-960e254dfd67" />
 
