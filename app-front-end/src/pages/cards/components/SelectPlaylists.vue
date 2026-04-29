@@ -49,7 +49,7 @@ function togglePlaylist(id: string) {
 </script>
 
 <template>
-  <Table class="max-w-[720px] table-fixed">
+  <Table class="w-[900px] table-fixed">
     <TableBody v-if="isLoading">
       <TableRow>
         <TableCell> Loading...</TableCell>

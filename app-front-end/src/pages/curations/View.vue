@@ -30,7 +30,7 @@ async function load() {
 </script>
 
 <template>
-  <div class="w-[720px]">
+  <div class="w-[900px]">
     <span v-if="isLoading && !curation"> Loading </span>
     <span v-else-if="!curation"> Couldn't get curation </span>
     <Tabs v-else default-value="curation_details">

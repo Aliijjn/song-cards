@@ -7,7 +7,7 @@ import { auth } from '@/general/auth';
 </script>
 
 <template>
-  <div class="flex flex-col gap-20">
+  <div class="flex flex-col gap-15">
     <span class="text-5xl"> Song Cards </span>
 
     <div class="flex justify-between items-center gap-20">
