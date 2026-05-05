@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableEmpty, TableRow } from '@/components/
 import { Checkbox } from '@/components/ui/checkbox';
 import { computed, onMounted, ref } from 'vue';
 import type { PlaylistDTO } from '@/types/types.ts';
-import { getPlaylists } from '@/pages/cards/api.ts';
+import ExportAPI from '@/pages/cards/api.ts';
 
 const selectedPlaylists = defineModel<string[]>();
 const isLoading = defineModel<boolean>('isLoading', { default: true });
@@ -16,7 +16,7 @@ const isLast = ref(false);
 
 onMounted(async () => {
   isLoading.value = true;
-  const response = await getPlaylists();
+  const response = await ExportAPI.getPlaylists();
   if (response.status === 'success') {
     const data = response.value;
 

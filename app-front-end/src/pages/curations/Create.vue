@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import CurationCreationDTO = App.Data.CurationCreationDTO;
+import Breadcrumbs from '@/general/Breadcrumbs.vue';
 
 const curation = ref<CurationCreationDTO>({
   name: '',
@@ -22,13 +23,17 @@ const search = ref('');
 const isLoading = ref(true);
 
 async function create() {
-  await CurationAPI.create(curation.value);
+  const response = await CurationAPI.create(curation.value);
 
-  router.push('/curations');
+  if (response.status === 'success') {
+    router.push(`/curations/${response.value}`);
+  }
 }
 </script>
 
 <template>
+  <Breadcrumbs :breadcrumbs="[{ text: 'Curations', to: '/curations' }, { text: 'New Curation' }]" />
+
   <div class="flex flex-col gap-10 mb-5">
     <div class="flex flex-col gap-3">
       <span class="text-3xl"> Curation Data </span>

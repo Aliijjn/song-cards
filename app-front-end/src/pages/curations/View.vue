@@ -8,12 +8,23 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CurationDetails from '@/pages/curations/viewOptions/CurationDetails.vue';
 import AdvancedActions from '@/pages/curations/viewOptions/AdvancedActions.vue';
 import SongDetails from '@/pages/curations/viewOptions/SongDetails.vue';
+import Breadcrumbs, { type Breadcrumb } from '@/general/Breadcrumbs.vue';
 
 const route = useRoute();
 
 const uuid = computed(() => route.params.uuid as string);
 const curation = ref<CurationDTO>();
 const isLoading = ref(true);
+
+const breadcrumbs = computed<Breadcrumb[]>(() => [
+  {
+    text: 'Curations',
+    to: '/curations',
+  },
+  {
+    text: curation.value?.name ?? '',
+  },
+]);
 
 watch(uuid, load, { immediate: true });
 
@@ -30,11 +41,12 @@ async function load() {
 </script>
 
 <template>
-  <div class="w-[900px]">
+  <Breadcrumbs :breadcrumbs="breadcrumbs" />
+  <div class="w-full">
     <span v-if="isLoading && !curation"> Loading </span>
     <span v-else-if="!curation"> Couldn't get curation </span>
     <Tabs v-else default-value="curation_details">
-      <TabsList class="mb-5 w-full h-10">
+      <TabsList class="mb-6 w-full h-10">
         <TabsTrigger class="w-full" value="curation_details"> Curation Details</TabsTrigger>
         <TabsTrigger class="w-full" value="song_details"> Song Details</TabsTrigger>
         <TabsTrigger class="w-full" value="advanced_actions"> Advanced Actions</TabsTrigger>

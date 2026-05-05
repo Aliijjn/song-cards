@@ -181,6 +181,12 @@
     }
 }
 
+@layer utilities {
+    .text-subtitle {
+        @apply text-2xl;
+    }
+}
+
 .opaque {
     opacity: 0.7;
 }

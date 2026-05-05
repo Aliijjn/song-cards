@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableEmpty, TableRow } from '@/components/
 import { ArrowLeft, ArrowRight } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import ExportDTO = App.Data.ExportDTO;
-import { fetchExports } from '@/pages/cards/api.ts';
+import ExportAPI from '@/pages/cards/api.ts';
 
 const { showFooter = false } = defineProps<{
   showFooter?: boolean;
@@ -22,7 +22,7 @@ watch(
   [start, length],
   async () => {
     isLoading.value = true;
-    const response = await fetchExports(1, start.value, length.value);
+    const response = await ExportAPI.fetchExports(1, start.value, length.value);
     if (response.status === 'success') {
       exports.value = response.value;
     }

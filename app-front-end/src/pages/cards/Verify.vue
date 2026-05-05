@@ -4,7 +4,7 @@ import { useCardStore } from '@/pages/cards/cardStore.ts';
 import type { SongCardDTO } from '@/types/types.ts';
 import { Button } from '@/components/ui/button';
 import { router } from '@/router.ts';
-import { exportCardData, getCardData } from '@/pages/cards/api.ts';
+import ExportAPI from '@/pages/cards/api.ts';
 import SelectSongs from '@/pages/cards/components/SelectSongs.vue';
 
 const cardStore = useCardStore();
@@ -14,7 +14,7 @@ const validCards = ref<SongCardDTO[]>([]);
 const invalidCards = ref<SongCardDTO[]>([]);
 
 onMounted(async () => {
-  const response = await getCardData(cardStore.selectedPlaylists);
+  const response = await ExportAPI.getCardData(cardStore.selectedPlaylists);
   if (response.status === 'success') {
     const { valid, invalid } = response.value;
 
@@ -29,7 +29,7 @@ onMounted(async () => {
 
 async function startExport() {
   isLoading.value = true;
-  const response = await exportCardData(cardStore.selectedSongCards);
+  const response = await ExportAPI.exportCardData(cardStore.selectedSongCards);
   if (response.status === 'success') {
     const uuid = response.value;
     router.push(`/cards/preview/${uuid}`);

@@ -14,7 +14,7 @@ function download() {
 </script>
 
 <template>
-  <div class="gap-5 w-[900px] flex flex-col flex-1">
+  <div class="gap-5 max-w-[900px] flex flex-col flex-1">
     <div class="flex justify-between items-center">
       <div class="text-3xl">Your Cards (PDF)</div>
       <Button v-if="uuid" size="lg" @click="download">
@@ -22,7 +22,7 @@ function download() {
         Download
       </Button>
     </div>
-    <div class="w-full flex flex-col flex-1 pb-5">
+    <div class="flex flex-col flex-1 pb-5">
       <span v-if="!uuid">Failed to load PDF</span>
       <iframe
         v-else

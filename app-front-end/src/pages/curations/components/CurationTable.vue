@@ -28,7 +28,7 @@ async function runExport(curationId: string) {
 </script>
 
 <template>
-  <Table class="w-[900px] table-fixed">
+  <Table class="table-fixed">
     <TableBody v-if="isLoading">
       <TableRow>
         <TableCell> Loading...</TableCell>
@@ -36,11 +36,11 @@ async function runExport(curationId: string) {
     </TableBody>
     <TableBody v-else>
       <TableEmpty v-if="!curations.length"> No curations found</TableEmpty>
-      <TableRow v-for="curation in curations" :key="curation.id" class="w-[900px]">
+      <TableRow v-for="curation in curations" :key="curation.id">
         <TableCell class="flex flex-row items-center gap-3">
           <div class="flex flex-col truncate">
-            <div class="font-bold">{{ curation.name }}</div>
-            <div>{{ curation.createdBy }}</div>
+            <div>{{ curation.name }}</div>
+            <div class="opaque">{{ curation.createdBy }}</div>
           </div>
         </TableCell>
         <TableCell>

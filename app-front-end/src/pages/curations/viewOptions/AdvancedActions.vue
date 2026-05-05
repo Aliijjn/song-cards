@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Copy, Merge, Trash2 } from 'lucide-vue-next';
+import { Copy, Merge, Trash2, QrCode } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import CopyCurationDialog from '@/pages/curations/components/CopyCurationDialog.vue';
@@ -11,6 +11,7 @@ import { router } from '@/router.ts';
 const curation = defineModel<CurationDTO>({ required: true });
 const isLoading = defineModel<boolean>('isLoading', { required: true });
 
+const isExporting = ref(false);
 const isCopyModalOpen = ref(false);
 
 async function deleteCuration() {
@@ -22,21 +23,50 @@ async function deleteCuration() {
     router.push('/curations');
   }
 }
+
+async function runExport() {
+  isExporting.value = true;
+  const response = await CurationAPI.toExport(curation.value.id);
+  if (response.status === 'success') {
+    const exportId = response.value;
+
+    router.push(`/cards/preview/${exportId}`);
+  }
+  isExporting.value = false;
+}
 </script>
 
 <template>
   <CopyCurationDialog v-model:is-open="isCopyModalOpen" :curation="curation" />
 
-  <div class="flex flex-col gap-10">
-    <div class="flex flex-col gap-5">
-      <div class="flex gap-5 items-center">
-        <span class="text-3xl whitespace-nowrap">Actions</span>
+  <div class="flex flex-col gap-9">
+    <div class="flex flex-col gap-3">
+      <div class="flex gap-3 items-center">
+        <Label class="text-subtitle whitespace-nowrap">Export</Label>
         <Separator class="flex-1" />
       </div>
 
-      <div class="flex justify-between items-center gap-10">
+      <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label>Duplicate Curation</Label>
+          <Label class="font-medium">Export To Song Cards</Label>
+          <span class="opaque">Turn this curation into a PDF you can print and cut out</span>
+        </div>
+        <Button size="lg" :disabled="isExporting" @click="runExport">
+          <QrCode />
+          Export
+        </Button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div class="flex gap-3 items-center">
+        <Label class="text-subtitle whitespace-nowrap">Actions</Label>
+        <Separator class="flex-1" />
+      </div>
+
+      <div class="flex justify-between items-center gap-9">
+        <div class="flex flex-col">
+          <Label class="font-medium">Duplicate Curation</Label>
           <span class="opaque">Create a copy of this curation</span>
         </div>
         <Button size="lg" @click="isCopyModalOpen = true">
@@ -45,9 +75,9 @@ async function deleteCuration() {
         </Button>
       </div>
 
-      <div class="flex justify-between items-center gap-10">
+      <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label>Combine With Other Curations</Label>
+          <Label class="font-medium">Combine With Other Curations</Label>
           <span class="opaque">Combine this curation with multiple other curation</span>
         </div>
         <Button size="lg">
@@ -57,15 +87,15 @@ async function deleteCuration() {
       </div>
     </div>
 
-    <div class="flex flex-col gap-5">
-      <div class="flex gap-5 items-center">
-        <span class="text-3xl whitespace-nowrap">Danger Zone</span>
+    <div class="flex flex-col gap-3">
+      <div class="flex gap-3 items-center">
+        <Label class="text-subtitle whitespace-nowrap">Danger Zone</Label>
         <Separator class="flex-1" />
       </div>
 
-      <div class="flex justify-between items-center gap-10">
+      <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label>Delete Curation</Label>
+          <Label class="font-medium">Delete Curation</Label>
           <span class="opaque">This action cannot be undone</span>
         </div>
         <Button variant="destructive" size="lg" @click="deleteCuration">

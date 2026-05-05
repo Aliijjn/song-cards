@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import HeaderBar from '@/general/HeaderBar.vue';
-import { Card } from '@/components/ui/card';
+import SecondaryHeaderBar from '@/general/SecondaryHeaderBar.vue';
 </script>
 
 <template>
-  <div class="h-[100dvh] flex flex-col bg-gradient-to-br from-background to-card">
-    <HeaderBar />
-    <div class="flex flex-1 justify-center p-5 overflow-y-scroll">
-      <RouterView />
+  <div class="h-[100dvh] flex flex-col justify-center bg-gradient-to-br from-background to-card">
+    <div class="h-[70px]">
+      <HeaderBar />
+    </div>
+    <div class="grow flex justify-center min-h-0 px-5 pt-0 overflow-y-scroll">
+      <div class="flex flex-col gap-6 max-w-[900px] w-full">
+        <SecondaryHeaderBar />
+        <RouterView />
+      </div>
     </div>
   </div>
 </template>

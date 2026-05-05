@@ -79,7 +79,9 @@ class CurationController extends Controller
 
     public function create(Request $request, SpotifyApiService $apiService): JsonResponse
     {
-        DB::transaction(function () use ($request, $apiService) {
+        $curationId = null;
+
+        DB::transaction(function () use ($request, $apiService, &$curationId) {
 
             $now = now();
 
@@ -182,7 +184,7 @@ class CurationController extends Controller
                 ->map(fn($chunk) => DB::table('curation_song')->insert($chunk->toArray()));
         });
 
-        return new JsonResponse(status: 204);
+        return new JsonResponse($curationId);
     }
 
     public function delete(Curation $curation): JsonResponse
