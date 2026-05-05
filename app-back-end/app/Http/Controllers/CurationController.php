@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\CurationCombineDTO;
 use App\Data\CurationCopyDTO;
 use App\Data\CurationCreationDTO;
 use App\Data\SongEditCreationDTO;
@@ -63,6 +64,14 @@ class CurationController extends Controller
 
         return new JsonResponse($newCuration->id);
     }
+
+//    public function combine(Curation $curation, Request $request): JsonResponse
+//    {
+//        $combineDto = CurationCombineDTO::from($request->get('combine'));
+//        $newCuration = $combineDto->keepOriginal ? $curation : $curation->copy($combineDto);
+//
+//
+//    }
 
     public function export(Curation $curation): JsonResponse
     {
