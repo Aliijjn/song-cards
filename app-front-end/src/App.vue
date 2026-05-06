@@ -5,7 +5,7 @@ import SecondaryHeaderBar from '@/general/SecondaryHeaderBar.vue';
 
 <template>
   <div class="h-[100dvh] flex flex-col justify-center bg-gradient-to-br from-background to-card">
-    <div class="h-[70px]">
+    <div class="h-[65px]">
       <HeaderBar />
     </div>
     <div class="grow flex justify-center min-h-0 px-5 pt-0 overflow-y-scroll">

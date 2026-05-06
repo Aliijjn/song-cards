@@ -24,10 +24,9 @@ class CurationDTO extends Data
     )
     {
     }
-    
+
     public static function fromModel(Curation $curation): self
     {
-        ray($curation->name, $curation->songs);
         $songEdits = $curation->songEdits
             ->mapWithKeys(fn($songEdit) => [$songEdit->song_id => $songEdit]);
 

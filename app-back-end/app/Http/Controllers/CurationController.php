@@ -60,18 +60,16 @@ class CurationController extends Controller
     public function copy(Curation $curation, Request $request): JsonResponse
     {
         $copyDto = CurationCopyDTO::from($request->get('copy'));
-        $newCuration = $curation->copy($copyDto);
 
-        return new JsonResponse($newCuration->id);
+        return new JsonResponse($curation->copy($copyDto)->id);
     }
 
-//    public function combine(Curation $curation, Request $request): JsonResponse
-//    {
-//        $combineDto = CurationCombineDTO::from($request->get('combine'));
-//        $newCuration = $combineDto->keepOriginal ? $curation : $curation->copy($combineDto);
-//
-//
-//    }
+    public function combine(Curation $curation, Request $request): JsonResponse
+    {
+        $combineDto = CurationCombineDTO::from($request->get('combine'));
+
+        return new JsonResponse($curation->combine($combineDto)->id);
+    }
 
     public function export(Curation $curation): JsonResponse
     {
@@ -124,7 +122,7 @@ class CurationController extends Controller
                     fn($asset) => collect($asset['images'])->map(
                         fn($image) => [
                             'asset_id' => $asset['id'],
-                            'asset_type' => $asset['type'],
+                            'asset_type' => ('App\Models\\' . ucfirst($asset['type'])),
                             ...$image,
                         ]
                     )
@@ -149,9 +147,9 @@ class CurationController extends Controller
                 'id' => Uuid::uuid7(now())->toString(),
                 'created_at' => $now,
                 'updated_at' => $now,
-                match ($image['asset_type']) {
-                    'artist' => Artist::whereSpotifyId($image['asset_id'])->first()->id,
-                    'album' => Album::whereSpotifyId($image['asset_id'])->first()->id,
+                'asset_id' => match ($image['asset_type']) {
+                    'App\Models\Artist' => Artist::whereSpotifyId($image['asset_id'])->first()->id,
+                    'App\Models\Album' => Album::whereSpotifyId($image['asset_id'])->first()->id,
                 }
             ]);
             $imagesMap->map(fn($image) => [

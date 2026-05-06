@@ -49,13 +49,15 @@ const colorOptions: ColorOption[] = [
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button v-if="globalStore.isUserSpotifyTokenValid" variant="outline" size="icon-lg">
-        <User class="size-6 stroke-[1.2]" />
-      </Button>
-      <Button v-else>
-        <User />
-        Log In
-      </Button>
+      <div>
+        <Button v-if="globalStore.isUserSpotifyTokenValid" variant="outline" size="icon-lg">
+          <User class="size-6 stroke-[1.2]" />
+        </Button>
+        <Button v-else>
+          <User />
+          Log In
+        </Button>
+      </div>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="start" class="w-45 mr-3">
       <DropdownMenuGroup>

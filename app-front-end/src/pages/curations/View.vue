@@ -10,11 +10,14 @@ import AdvancedActions from '@/pages/curations/viewOptions/AdvancedActions.vue';
 import SongDetails from '@/pages/curations/viewOptions/SongDetails.vue';
 import Breadcrumbs, { type Breadcrumb } from '@/general/Breadcrumbs.vue';
 
+type Tabs = 'curation_details' | 'song_details' | 'advanced_actions';
 const route = useRoute();
 
-const uuid = computed(() => route.params.uuid as string);
+const selectedTab = ref<Tabs>('curation_details');
 const curation = ref<CurationDTO>();
 const isLoading = ref(true);
+
+const uuid = computed(() => route.params.uuid as string);
 
 const breadcrumbs = computed<Breadcrumb[]>(() => [
   {
@@ -36,6 +39,8 @@ async function load() {
   } else {
     router.push('/404');
   }
+
+  selectedTab.value = 'curation_details';
   isLoading.value = false;
 }
 </script>
@@ -45,7 +50,7 @@ async function load() {
   <div class="w-full">
     <span v-if="isLoading && !curation"> Loading </span>
     <span v-else-if="!curation"> Couldn't get curation </span>
-    <Tabs v-else default-value="curation_details">
+    <Tabs v-else v-model="selectedTab">
       <TabsList class="mb-6 w-full h-10">
         <TabsTrigger class="w-full" value="curation_details"> Curation Details</TabsTrigger>
         <TabsTrigger class="w-full" value="song_details"> Song Details</TabsTrigger>

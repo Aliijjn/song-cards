@@ -48,7 +48,7 @@ onMounted(async () => {
           Show All
         </Button>
       </div>
-      <CurationTable :curations="recentCurations" :is-loading="isLoading" />
+      <CurationTable :curations="recentCurations" :is-loading="isLoading" show-actions />
     </div>
   </div>
 </template>

@@ -24,12 +24,13 @@ Route::middleware(['api'])
             Route::get('/{curation}', [CurationController::class, 'index']);
             Route::put('/{curation}', [CurationController::class, 'update']);
             Route::post('/{curation}/copy', [CurationController::class, 'copy']);
+            Route::post('/{curation}/combine', [CurationController::class, 'combine']);
             Route::get('/{curation}/export', [CurationController::class, 'export']);
             Route::post('/', [CurationController::class, 'create']);
 
             Route::delete('/{curation}', [CurationController::class, 'delete']);
             Route::delete('/{curation}/{song}', [CurationController::class, 'deleteSong']);
-            
+
             Route::put('/{curation}/edit', [CurationController::class, 'addEdit']);
         });
 

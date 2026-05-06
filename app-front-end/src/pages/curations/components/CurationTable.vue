@@ -7,10 +7,17 @@ import { Table, TableBody, TableCell, TableEmpty, TableRow } from '@/components/
 import CurationDTO = App.Data.CurationDTO;
 import { ref } from 'vue';
 import CurationAPI from '@/pages/curations/api.ts';
+import { Checkbox } from '@/components/ui/checkbox';
 
-const { curations, isLoading } = defineProps<{
+const selected = defineModel<string[]>('selected', { default: null });
+const {
+  curations,
+  isLoading = false,
+  showActions = false,
+} = defineProps<{
   curations: CurationDTO[];
-  isLoading: boolean;
+  isLoading?: boolean;
+  showActions?: boolean;
 }>();
 
 const isExporting = ref(false);
@@ -25,6 +32,15 @@ async function runExport(curationId: string) {
   }
   isExporting.value = false;
 }
+
+function toggle(curationId: string) {
+  if (selected.value === null) return;
+  if (selected.value.includes(curationId)) {
+    selected.value = selected.value.filter((p) => p !== curationId);
+  } else {
+    selected.value.push(curationId);
+  }
+}
 </script>
 
 <template>
@@ -36,7 +52,10 @@ async function runExport(curationId: string) {
     </TableBody>
     <TableBody v-else>
       <TableEmpty v-if="!curations.length"> No curations found</TableEmpty>
-      <TableRow v-for="curation in curations" :key="curation.id">
+      <TableRow v-for="curation in curations" :key="curation.id" @click="toggle(curation.id)">
+        <TableCell v-if="selected !== null">
+          <Checkbox :model-value="selected.includes(curation.id)" />
+        </TableCell>
         <TableCell class="flex flex-row items-center gap-3">
           <div class="flex flex-col truncate">
             <div>{{ curation.name }}</div>
@@ -49,7 +68,7 @@ async function runExport(curationId: string) {
         <TableCell>
           {{ dayjs(curation.updatedAt).format('MMMM DD YYYY HH:mm') }}
         </TableCell>
-        <TableCell>
+        <TableCell v-if="showActions">
           <div class="flex justify-end gap-2">
             <Button
               size="icon"

@@ -4,6 +4,7 @@ import CurationDTO = App.Data.CurationDTO;
 import CurationUpdateDTO = App.Data.CurationUpdateDTO;
 import CurationCopyDTO = App.Data.CurationCopyDTO;
 import SongEditCreationDTO = App.Data.SongEditCreationDTO;
+import CurationCombineDTO = App.Data.CurationCombineDTO;
 
 export default class CurationAPI {
   static getMultiple(start?: number, length?: number): Promise<ApiResult<CurationDTO[]>> {
@@ -24,6 +25,10 @@ export default class CurationAPI {
 
   static copy(id: string, copy: CurationCopyDTO): Promise<ApiResult<string>> {
     return apiRequest(`/curations/${id}/copy`, { method: 'POST', body: { copy } });
+  }
+
+  static combine(id: string, combine: CurationCombineDTO): Promise<ApiResult<string>> {
+    return apiRequest(`/curations/${id}/combine`, { method: 'POST', body: { combine } });
   }
 
   static toExport(id: string): Promise<ApiResult<string>> {

@@ -7,12 +7,14 @@ import { ref } from 'vue';
 import CurationDTO = App.Data.CurationDTO;
 import CurationAPI from '@/pages/curations/api.ts';
 import { router } from '@/router.ts';
+import CombineCurationDialog from '@/pages/curations/components/CombineCurationDialog.vue';
 
 const curation = defineModel<CurationDTO>({ required: true });
 const isLoading = defineModel<boolean>('isLoading', { required: true });
 
 const isExporting = ref(false);
 const isCopyModalOpen = ref(false);
+const isCombineModalOpen = ref(false);
 
 async function deleteCuration() {
   if (!curation.value) return;
@@ -38,6 +40,7 @@ async function runExport() {
 
 <template>
   <CopyCurationDialog v-model:is-open="isCopyModalOpen" :curation="curation" />
+  <CombineCurationDialog v-model:is-open="isCombineModalOpen" :current-curation-id="curation.id" />
 
   <div class="flex flex-col gap-9">
     <div class="flex flex-col gap-3">
@@ -80,7 +83,7 @@ async function runExport() {
           <Label class="font-medium">Combine With Other Curations</Label>
           <span class="opaque">Combine this curation with multiple other curation</span>
         </div>
-        <Button size="lg">
+        <Button size="lg" @click="isCombineModalOpen = true">
           <Merge />
           Combine
         </Button>

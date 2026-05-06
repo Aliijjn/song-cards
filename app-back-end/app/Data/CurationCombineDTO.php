@@ -14,7 +14,7 @@ class CurationCombineDTO extends Data
         public ?string    $description = null,
         public int        $userId,
         public bool       $keepOriginal,
-        public Collection $playlistIds,
+        public Collection $curationIds,
     )
     {
     }

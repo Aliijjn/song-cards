@@ -44,9 +44,15 @@ class Image extends Model
     /**
      * @param Collection<static> $images
      */
-    public static function getSmallestSquare(Collection $images): ?static
+    public static function getSmallestSquare(Collection $images, int $minSize = 300): ?static
     {
-        return $images->filter(fn($image) => $image->isSquareish())
-            ->min(fn($image) => $image->width);
+        return $images
+            ->filter(fn($image) => $image->width >= $minSize && $image->isSquareish())
+            ->reduce(function (?self $smallest, self $image) {
+                if ($smallest === null) {
+                    return $image;
+                }
+                return $smallest->width < $image->width ? $smallest : $image;
+            });
     }
 }

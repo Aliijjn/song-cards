@@ -52,10 +52,10 @@ function getSongErrorCount(count: number) {
       <TableRow v-for="(song, index) in curation.songs" :key="song.id">
         <TableCell>
           <div class="flex flex-row items-center gap-3">
-            <img :src="song.imageUrl" alt="image" class="h-15 w-15 rounded object-cover" />
+            <img :src="song.albumCoverUrl" alt="image" class="h-15 w-15 rounded object-cover" />
             <div class="flex flex-col truncate">
               <div class="font-bold">{{ song.name }}</div>
-              <div>{{ song.artist_name.join(', ') }}</div>
+              <div class="opaque">{{ song.artist_name.join(', ') }}</div>
             </div>
           </div>
         </TableCell>

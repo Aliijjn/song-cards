@@ -8,6 +8,7 @@ use App\Tools\Classes\DefaultModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 
 class Curation extends DefaultModel
@@ -27,44 +28,53 @@ class Curation extends DefaultModel
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function copy(CurationCopyDTO|CurationCombineDTO $copyDto): Curation
+    private function copyTo(Curation $to, ?int $maxCount = null): void
     {
         $this->loadMissing(['songs', 'songEdits']);
 
         $now = now();
-        $newCuration = Curation::create([
-            'name' => $copyDto->name,
-            'description' => $copyDto->description,
-            'created_by' => $copyDto->userId
-        ]);
         $songs = $this->songs
             ->when(
-                $copyDto?->maxSongCount ?? null,
-                fn($query) => $query->random($copyDto->maxSongCount)
+                $maxCount,
+                fn($query) => $query->random($maxCount)
             )
             ->mapWithKeys(fn($song) => [
                 $song->id => [
-                    'curation_id' => $newCuration->id,
+                    'curation_id' => $to->id,
                     'song_id' => $song->id,
                     'created_at' => $now,
                     'updated_at' => $now
                 ]
             ]);
         $selectedSongIds = $songs->keys();
-        ray($this->songEdits, $selectedSongIds);
         $songEdits = $this->songEdits
             ->whereIn('song_id', $selectedSongIds)
             ->mapWithKeys(fn($songEdit) => [
                 $songEdit->id => [
-                    'curation_id' => $newCuration->id,
+                    'curation_id' => $to->id,
                     'song_edit_id' => $songEdit->id,
                     'created_at' => $now,
                     'updated_at' => $now
                 ]
             ]);
 
-        $newCuration->songs()->sync($songs);
-        $newCuration->songEdits()->sync($songEdits);
+        $to->songs()->sync($songs);
+        $to->songEdits()->sync($songEdits);
+    }
+
+    public function copy(CurationCopyDTO|CurationCombineDTO $copyDto): self
+    {
+        $newCuration = null;
+
+        DB::transaction(function () use ($copyDto, &$newCuration) {
+            $newCuration = Curation::create([
+                'name' => $copyDto->name,
+                'description' => $copyDto->description,
+                'created_by' => $copyDto->userId
+            ]);
+
+            $this->copyTo($newCuration, $copyDto->maxSongCount ?? null);
+        });
 
         return $newCuration;
     }
@@ -72,8 +82,18 @@ class Curation extends DefaultModel
     /**
      * @param Collection<string> $ids
      */
-    public function combine(Collection $ids): void
+    public function combine(CurationCombineDTO $combineDto): self
     {
+        $newCuration = null;
 
+        DB::transaction(function () use ($combineDto, &$newCuration) {
+            $newCuration = $combineDto->keepOriginal ? $this->copy($combineDto) : $this;
+
+            Curation::whereIn('id', $combineDto->curationIds)
+                ->get()
+                ->each(fn($curation) => $curation->copyTo($newCuration));
+        });
+
+        return $newCuration;
     }
 }

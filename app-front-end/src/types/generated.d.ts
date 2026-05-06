@@ -1,4 +1,11 @@
 declare namespace App.Data {
+export type CurationCombineDTO = {
+name: string;
+description: string | null;
+userId: number;
+keepOriginal: boolean;
+curationIds: Array<any>;
+};
 export type CurationCopyDTO = {
 name: string;
 description: string | null;
@@ -61,6 +68,7 @@ imageUrl: string;
 };
 export type SongDTO = {
 id: string;
+spotifyId: string;
 name: string;
 artist_name: Array<any>;
 album_name: string;
