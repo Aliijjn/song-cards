@@ -7,9 +7,7 @@ use App\Data\CurationCopyDTO;
 use App\Tools\Classes\DefaultModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Ramsey\Uuid\Uuid;
 
 class Curation extends DefaultModel
 {
@@ -35,7 +33,7 @@ class Curation extends DefaultModel
         $now = now();
         $songs = $this->songs
             ->when(
-                $maxCount,
+                $maxCount !== null && $maxCount > 0,
                 fn($query) => $query->random($maxCount)
             )
             ->mapWithKeys(fn($song) => [
@@ -58,8 +56,8 @@ class Curation extends DefaultModel
                 ]
             ]);
 
-        $to->songs()->sync($songs);
-        $to->songEdits()->sync($songEdits);
+        $to->songs()->syncWithoutDetaching($songs);
+        $to->songEdits()->syncWithoutDetaching($songEdits);
     }
 
     public function copy(CurationCopyDTO|CurationCombineDTO $copyDto): self
@@ -79,9 +77,6 @@ class Curation extends DefaultModel
         return $newCuration;
     }
 
-    /**
-     * @param Collection<string> $ids
-     */
     public function combine(CurationCombineDTO $combineDto): self
     {
         $newCuration = null;

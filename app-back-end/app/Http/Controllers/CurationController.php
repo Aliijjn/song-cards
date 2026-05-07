@@ -84,6 +84,7 @@ class CurationController extends Controller
         );
     }
 
+    // todo: refactor this mess, as it's unreadable and has a tendency to crash when artists already exist
     public function create(Request $request, SpotifyApiService $apiService): JsonResponse
     {
         $curationId = null;
