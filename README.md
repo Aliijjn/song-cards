@@ -1,5 +1,6 @@
 # Song Cards
 
+<img width="3420" height="1968" alt="image" src="https://github.com/user-attachments/assets/d9b44de2-2f9d-4d2f-be04-abeeb3d0c16f" />
 
 
 ## How the application works
