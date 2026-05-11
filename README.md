@@ -1,28 +1,35 @@
 # Song Cards
 
-<img width="3420" height="1968" alt="image" src="https://github.com/user-attachments/assets/d9b44de2-2f9d-4d2f-be04-abeeb3d0c16f" />
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/bd5a2c61-c329-45ce-a0ff-82c29af56411" />
 
 
 ## How the application works
 (note: background gradient doesn't work because Firefox)
-1. Make sure you're logged in through Spotify. Go to "Curations" in the top-right and click "Create Curation"
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/46423851-a898-4989-b0bc-960e254dfd67" />
+### 1. Make sure you're logged in through Spotify. Go to "Curations" in the top-right and click "Create Curation"
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/f44c3c73-f95a-4ae0-a1ba-162195873c1e" />
 
-2. Give your curation a name and select the playlists you want to include (can be multiple)
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/4f9478fa-856c-4dd7-ad5c-8fc89dcb1438" />
 
-3. [Optional] Go to "Song Details" and check if the data is correct. You can edit a song by pressing the pencil. Spotify's API can be a bit of a mess with singles and rereleases
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/2ab89f05-e9fb-4d19-8a85-d0464665b5e2" />
+### 2. Give your curation a name and select the playlists you want to include (can be multiple)
+<img width="3008" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/f62d3ea1-4ae8-44e3-bc85-25bc5b1e439c" />
 
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/b29bc9fb-1c57-45fb-8ca6-0700ca41f6a6" />
+### 3. [Optional] Go to "Song Details" and check if the data is correct. You can edit a song by pressing the pencil. Spotify's API can be a bit of a mess with singles and rereleases
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/62f79898-1bec-41ff-ab63-569ae83020eb" />
 
-4. Go to "Advanced Options" and click on "Export" to export your curation to a PDF. Beware, this takes quite a while, especially if your curation is large (>100 songs)
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/b0bac8df-0074-422d-9a53-87acdc394e0f" />
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/ff58f40f-14a9-4453-b9e5-8b2913e517e1" />
 
-5. Enjoy your cards!
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/74b401c3-cd87-450b-887c-0d79e4a6d33f" />
+### 4. [Optional] Go to "Advanced Options". Here you can make copies of and combine curations
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/40f7abf8-1ded-4bab-b940-8a79b805aac3" />
 
-<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/ac4bf1d9-0058-43b1-99ea-a1c230f1b7a9" />
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/a85aceec-1d58-4cd1-b283-ff8884eb595a" />
+
+
+### 5. In "Advanced Options", click on "Export" to export your curation to a PDF. Beware, this takes quite a while, especially if your curation is large (>100 songs)
+
+### 6. Enjoy your cards!
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/92247fa0-e4e9-4dc0-a895-3c7bad8563f0" />
+
+<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/bd5a2c61-c329-45ce-a0ff-82c29af56411" />
+
 
 ## Setup
 1. Clone the project
