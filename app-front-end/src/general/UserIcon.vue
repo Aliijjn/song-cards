@@ -53,7 +53,7 @@ const colorOptions: ColorOption[] = [
         <Button v-if="globalStore.isUserSpotifyTokenValid" variant="outline" size="icon-lg">
           <User class="size-6 stroke-[1.2]" />
         </Button>
-        <Button v-else>
+        <Button v-else variant="outline">
           <User />
           Log In
         </Button>

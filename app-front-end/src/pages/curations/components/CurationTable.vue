@@ -16,6 +16,7 @@ const {
   showActions = false,
 } = defineProps<{
   curations: CurationDTO[];
+  search?: string;
   isLoading?: boolean;
   showActions?: boolean;
 }>();

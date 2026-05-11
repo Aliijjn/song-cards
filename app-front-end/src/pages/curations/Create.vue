@@ -80,6 +80,7 @@ async function create() {
 .apply-button {
   position: fixed;
   bottom: 1rem;
-  margin: 0 auto;
+  left: 50%;
+  transform: translateX(-50%);
 }
 </style>

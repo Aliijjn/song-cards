@@ -6,7 +6,7 @@ const search = defineModel<string>();
 </script>
 
 <template>
-  <InputGroup v-bind="$props" class="w-60 my-1">
+  <InputGroup v-bind="$props" class="w-60">
     <InputGroupInput v-model="search" placeholder="Search" />
     <InputGroupAddon>
       <Search />
