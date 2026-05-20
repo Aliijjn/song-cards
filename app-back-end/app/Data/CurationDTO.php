@@ -34,7 +34,7 @@ class CurationDTO extends Data
             $curation->id,
             $curation->name,
             $curation->description,
-            $curation->createdBy->name,
+            $curation->system_generated ? 'System Generated' : $curation->createdBy?->name ?? 'Unknown User',
             $curation->updated_at,
             $curation->songs->map(
                 fn($song) => SongDTO::fromModel($song, $songEdits[$song->id] ?? null)

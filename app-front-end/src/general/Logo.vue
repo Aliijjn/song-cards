@@ -4,7 +4,7 @@ import { AudioLines } from 'lucide-vue-next';
 
 <template>
   <div class="flex gap-[6px] items-center">
-    <AudioLines class="size-8.5 text-primary" />
-    <Label class="text-2xl pt-[3px]"> Spoticards </Label>
+    <AudioLines class="size-8 text-primary" />
+    <Label class="text-[22px] pt-[3px]"> Spoticards </Label>
   </div>
 </template>

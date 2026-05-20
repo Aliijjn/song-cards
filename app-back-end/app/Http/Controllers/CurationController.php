@@ -106,6 +106,8 @@ class CurationController extends Controller
                 ->pluck('track')
                 ->unique('id');
 
+            ray($songs);
+
             $albums = $apiService->getAlbums($songs->pluck('album.id')
                 ->unique());
 

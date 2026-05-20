@@ -50,11 +50,53 @@ class Song extends DefaultModel
 
     private static function parseName(string $name): string
     {
-        $clutter = ['remaster', 'original', 'raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit'];
+        $clutter = ['remaster', 'original', 'raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit', 'feat', 'ii.', 'live at', 'with the', 'bonus track', '(with'];
 
         return collect(preg_split('#(?=[\(\-/])#', $name))
             ->filter(fn(string $name) => !Str::contains(Str::lower($name), $clutter))
-            ->join('');
+            ->join('') ?? $name; // in case of false positive, re-add the whole name
+    }
+
+    /**
+     * The raw songs from Spotify
+     * @param Collection<array> $raw
+     * A hashmap of: spotifyId => song
+     * @return Collection<string, string>
+     */
+    public static function addBatch(Collection $songs): Collection
+    {
+        $now = now();
+        $songs = $songs->map(function ($song) use ($now) {
+            $songUuid = Song::whereSpotifyId($song['id'])->first()?->id ?? null;
+            $exists = $songUuid !== null;
+
+            return [
+                ...$song,
+                'exists' => $exists,
+                'uuid' => $songUuid ?? Uuid::uuid7($now)->toString(),
+            ];
+        });
+        [$exists, $new] = $songs->partition(fn($song) => $song['exists']);
+        $tempAlbumId = Album::firstOrFail()->id; // todo: remove
+
+        $new->chunk(100)->each(
+            fn($chunk) => Song::insert($chunk->map(
+                fn($song) => [
+                    'id' => $song['uuid'],
+                    'spotify_id' => $song['id'],
+                    'name' => static::parseName($song['name']),
+                    'album_id' => $tempAlbumId,
+                    'duration_ms' => $song['duration_ms'],
+                    'popularity' => $song['popularity'],
+                    'track_number' => $song['track_number'],
+                    'errors' => SongErrorEnum::fromTrack($song),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ])->toArray()
+            )
+        );
+
+        return $new->concat($exists)->mapWithKeys(fn($song) => [$song['id'] => $song]);
     }
 
     public static function fromSongsRaw(Collection $songs): void
