@@ -5,6 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    const SPOTIFY_ID_LEN = 22;
+
     /**
      * Run the migrations.
      */
@@ -21,77 +23,94 @@ return new class extends Migration {
             });
 
             Schema::create('artists', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('spotify_id')->unique();
+                $table->char('id', self::SPOTIFY_ID_LEN)->primary();
                 $table->string('name');
                 $table->timestamps();
-
-                $table->index('spotify_id');
             });
 
             Schema::create('albums', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('spotify_id')->unique();
+                $table->char('id', self::SPOTIFY_ID_LEN)->primary();
                 $table->string('name');
                 $table->string('type');
                 $table->string('release_date'); // cannot be a datetime because of inconsistent formatting
                 $table->string('release_date_precision');
                 $table->integer('total_tracks');
                 $table->timestamps();
-
-                $table->index('spotify_id');
             });
 
             Schema::create('songs', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('spotify_id')->unique();
+                $table->char('id', self::SPOTIFY_ID_LEN)->primary();
+
                 $table->string('name');
-                $table->foreignUuid('album_id')
-                    ->constrained()
+
+                $table->char('album_id', self::SPOTIFY_ID_LEN);
+
+                $table->foreign('album_id')
+                    ->references('id')
+                    ->on('albums')
                     ->cascadeOnDelete();
+
                 $table->integer('duration_ms');
                 $table->integer('popularity');
                 $table->integer('track_number');
                 $table->jsonb('errors');
-                $table->timestamps();
 
-                $table->index('spotify_id');
+                $table->timestamps();
             });
 
-            // Pivot tables:
+            // Pivots
 
             Schema::create('artist_genre', function (Blueprint $table) {
-                $table->foreignUuid('artist_id')
-                    ->constrained()
-                    ->cascadeOnDelete();
+                $table->char('artist_id', self::SPOTIFY_ID_LEN);
+
                 $table->foreignUuid('genre_id')
                     ->constrained()
                     ->cascadeOnDelete();
+
                 $table->timestamps();
+
+                $table->foreign('artist_id')
+                    ->references('id')
+                    ->on('artists')
+                    ->cascadeOnDelete();
 
                 $table->unique(['artist_id', 'genre_id']);
             });
 
             Schema::create('album_artist', function (Blueprint $table) {
-                $table->foreignUuid('album_id')
-                    ->constrained()
-                    ->cascadeOnDelete();
-                $table->foreignUuid('artist_id')
-                    ->constrained()
-                    ->cascadeOnDelete();
+                $table->char('album_id', self::SPOTIFY_ID_LEN);
+                $table->char('artist_id', self::SPOTIFY_ID_LEN);
+
                 $table->timestamps();
+
+                $table->foreign('album_id')
+                    ->references('id')
+                    ->on('albums')
+                    ->cascadeOnDelete();
+
+                $table->foreign('artist_id')
+                    ->references('id')
+                    ->on('artists')
+                    ->cascadeOnDelete();
 
                 $table->unique(['album_id', 'artist_id']);
             });
 
             Schema::create('artist_song', function (Blueprint $table) {
-                $table->foreignUuid('artist_id')
-                    ->constrained()
-                    ->cascadeOnDelete();
-                $table->foreignUuid('song_id')
-                    ->constrained()
-                    ->cascadeOnDelete();
+                $table->char('artist_id', self::SPOTIFY_ID_LEN);
+                $table->char('song_id', self::SPOTIFY_ID_LEN);
+
                 $table->timestamps();
+
+                $table->foreign('artist_id')
+                    ->references('id')
+                    ->on('artists')
+                    ->cascadeOnDelete();
+
+                $table->foreign('song_id')
+                    ->references('id')
+                    ->on('songs')
+                    ->cascadeOnDelete();
 
                 $table->unique(['artist_id', 'song_id']);
             });

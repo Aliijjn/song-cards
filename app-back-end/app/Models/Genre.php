@@ -2,18 +2,13 @@
 
 namespace App\Models;
 
+use App\Tools\Classes\DefaultModelUuid;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Genre extends Model
+class Genre extends DefaultModelUuid
 {
-    use HasUuids, HasTimestamps;
-
-    protected $guarded = ['id'];
-
     public function artists(): BelongsToMany
     {
         return $this->belongsToMany(Artist::class);

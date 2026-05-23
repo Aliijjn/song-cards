@@ -5,6 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    const SPOTIFY_ID_LEN = 22;
+
     /**
      * Run the migrations.
      */
@@ -12,6 +14,7 @@ return new class extends Migration {
     {
         Schema::create('curations', function (Blueprint $table) {
             $table->uuid('id')->primary();
+
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('system_generated')->default(false);
@@ -20,17 +23,28 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+
             $table->timestamps();
         });
 
         Schema::create('curation_song', function (Blueprint $table) {
-            $table->foreignUuid('curation_id')
-                ->constrained('curations')
-                ->cascadeOnDelete();
-            $table->foreignUuid('song_id')
-                ->constrained('songs')
-                ->cascadeOnDelete();
+            $table->uuid('curation_id');
+            $table->char('song_id', self::SPOTIFY_ID_LEN);
+            $table->integer('order')->nullable();
+
             $table->timestamps();
+
+            $table->foreign('curation_id')
+                ->references('id')
+                ->on('curations')
+                ->cascadeOnDelete();
+
+            $table->foreign('song_id')
+                ->references('id')
+                ->on('songs')
+                ->cascadeOnDelete();
+
+            $table->unique(['curation_id', 'song_id']);
         });
     }
 
@@ -39,7 +53,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('curations');
         Schema::dropIfExists('curation_song');
+        Schema::dropIfExists('curations');
     }
 };

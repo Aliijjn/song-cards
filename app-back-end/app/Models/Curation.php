@@ -4,16 +4,20 @@ namespace App\Models;
 
 use App\Data\CurationCombineDTO;
 use App\Data\CurationCopyDTO;
-use App\Tools\Classes\DefaultModel;
+use App\Tools\Classes\DefaultModelUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
-class Curation extends DefaultModel
+class Curation extends DefaultModelUuid
 {
     public function songs(): BelongsToMany
     {
-        return $this->belongsToMany(Song::class);
+        return $this->belongsToMany(Song::class)
+            ->withPivot('order')
+            ->orderByPivot('order');
     }
 
     public function songEdits(): BelongsToMany
@@ -90,5 +94,38 @@ class Curation extends DefaultModel
         });
 
         return $newCuration;
+    }
+
+    public static function fromRawData(Collection $playlists, Collection $songs): void
+    {
+        $now = now();
+        $values = $playlists->mapWithKeys(fn($playlist) => [
+            $playlist['id'] => [
+                'id' => Uuid::uuid7($now)->toString(),
+                'name' => $playlist['name'],
+                'description' => $playlist['description'], // todo: beware of sketchy HTML
+                'system_generated' => true,
+                'created_by' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]
+        ])->toArray();
+        ray($songs);
+        $curationSong = $songs->map(function ($song, $key) use ($values, $now) {
+            $split = explode(':', $key);
+
+            return [
+                'curation_id' => $values[$split[0]]['id'],
+                'song_id' => $song['id'],
+                'order' => (int)$split[1] + (int)$split[2],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        })
+            ->toArray();
+        ray($curationSong);
+
+        Curation::insert($values);
+        DB::table('curation_song')->insertOrIgnore($curationSong);
     }
 }

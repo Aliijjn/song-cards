@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Ramsey\Uuid\Uuid;
 
 class Album extends DefaultModel
 {
@@ -37,14 +36,42 @@ class Album extends DefaultModel
 
     public static function parseReleaseDate(string $rawDate): CarbonImmutable
     {
-        ray($rawDate);
         $d = preg_split('/-/', $rawDate);
-        ray($d);
 
         return CarbonImmutable::startOfTime()
             ->setYear((int)($d[0] ?? '1970'))
             ->setMonth((int)($d[1] ?? '1'))
             ->setDay((int)($d[2] ?? '1'));
+    }
+
+    public static function fromRawData(Collection $albums): void
+    {
+        $now = now();
+        $values = $albums->map(
+            fn($album) => [
+                'id' => $album['id'],
+                'name' => $album['name'],
+                'type' => $album['type'],
+                'release_date' => static::parseReleaseDate($album['release_date']),
+                'release_date_precision' => $album['release_date_precision'],
+                'total_tracks' => $album['total_tracks']
+            ]
+        )->toArray();
+
+        self::upsert($values, 'id');
+
+        $albumArtist = $albums->flatMap(
+            fn($album) => collect($album['artists'])->map(
+                fn($artist) => [
+                    'album_id' => $album['id'],
+                    'artist_id' => $artist['id'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            )
+        )->toArray();
+
+        DB::table('album_artist')->insertOrIgnore($albumArtist);
     }
 
     public static function fromAlbumsRaw(Collection $albums, ?Collection $artistIds): void
@@ -56,8 +83,7 @@ class Album extends DefaultModel
         );
 
         $albums->map(fn($album) => [
-            'id' => Uuid::uuid7($now)->toString(),
-            'spotify_id' => $album['id'],
+            'id' => $album['id'],
             'name' => $album['name'],
             'type' => $album['type'],
             'release_date' => static::parseReleaseDate($album['release_date']),
@@ -77,6 +103,7 @@ class Album extends DefaultModel
         ]);
         ray($artistMap);
 
+        // todo: key_edit
         $now = now();
         $albums->flatMap(
             fn($album) => collect($album['artists'])->map(

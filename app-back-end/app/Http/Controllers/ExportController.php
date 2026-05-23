@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Ramsey\Uuid\Uuid;
 
 ini_set('max_execution_time', '12000');
+
 class ExportController extends Controller
 {
     const CARD_X_COUNT = 3;
@@ -25,15 +26,13 @@ class ExportController extends Controller
     public function fetchData(Request $request): JsonResponse
     {
         [$validCards, $invalidCards] = collect($request->get("playlist_ids"))
-            ->flatMap(fn ($playlistId) =>
-                Http::withToken(User::first()->spotify_access_token)
-                    ->get("https://api.spotify.com/v1/playlists/$playlistId/tracks")
-                    ->json()['items']
-            )->map(fn ($playlistObject) =>
-                SongCardDTO::fromTrackObject($playlistObject['track'])
+            ->flatMap(fn($playlistId) => Http::withToken(User::first()->spotify_access_token)
+                ->get("https://api.spotify.com/v1/playlists/$playlistId/tracks")
+                ->json()['items']
+            )->map(fn($playlistObject) => SongCardDTO::fromTrackObject($playlistObject['track'])
             )->unique('id')
-            ->partition(fn (SongCardDTO $songCard) => SongErrorEnum::isOk($songCard->errors))
-            ->map(fn (Collection $group) => $group->values());
+            ->partition(fn(SongCardDTO $songCard) => SongErrorEnum::isOk($songCard->errors))
+            ->map(fn(Collection $group) => $group->values());
 
         return new JsonResponse([
             'valid' => $validCards,
@@ -61,7 +60,7 @@ class ExportController extends Controller
                     ])->values();
 
                 $front = $back->chunk(self::CARD_X_COUNT)
-                    ->flatMap(fn ($chunk) => $chunk->reverse());
+                    ->flatMap(fn($chunk) => $chunk->reverse());
 
                 return ['front' => $front, 'back' => $back];
             });
@@ -71,7 +70,7 @@ class ExportController extends Controller
         Storage::disk('local')->put('data.json', json_encode($cardData->values(), JSON_PRETTY_PRINT));
 
         $uuid = Uuid::uuid7();
-        $result = Process::run([
+        $result = Process::timeout(300)->run([
             'typst',
             'compile',
             '--root', base_path(),
@@ -81,7 +80,7 @@ class ExportController extends Controller
 
         if ($result->exitCode()) {
             return new JsonResponse(
-                'Job failed with error code: '.$result->exitCode().': '.$result->errorOutput(),
+                'Job failed with error code: ' . $result->exitCode() . ': ' . $result->errorOutput(),
                 500
             );
         }
@@ -98,8 +97,8 @@ class ExportController extends Controller
     public function fetchExports(Request $request): JsonResponse
     {
         $user = User::whereId($request->get("user_id"))->firstOrFail();
-        $start = (int) $request->get("start", 0);
-        $length = (int) $request->get("length", 10);
+        $start = (int)$request->get("start", 0);
+        $length = (int)$request->get("length", 10);
 
         return new JsonResponse(
             ExportDTO::collect(

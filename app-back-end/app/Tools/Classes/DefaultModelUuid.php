@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class DefaultModel extends Model
+class DefaultModelUuid extends Model
 {
-    use HasTimestamps;
+    use HasUuids, HasTimestamps;
 
     public $incrementing = false;
 

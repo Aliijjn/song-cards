@@ -5,6 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    const SPOTIFY_ID_LEN = 22;
+
     /**
      * Run the migrations.
      */
@@ -16,12 +18,14 @@ return new class extends Migration {
             $table->integer('width');
             $table->integer('height');
             $table->timestamps();
+
+            $table->unique('url');
         });
 
         Schema::create('imageables', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('image_id');
-            $table->foreignUuid('imageable_id');
+            $table->char('imageable_id', self::SPOTIFY_ID_LEN);
             $table->string('imageable_type');
             $table->timestamps();
         });

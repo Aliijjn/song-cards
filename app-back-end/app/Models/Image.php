@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
+use App\Tools\Classes\DefaultModelUuid;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
-class Image extends Model
+class Image extends DefaultModelUuid
 {
-    use HasUuids, HasTimestamps;
-
-    protected $guarded = ['id'];
-
     public function imageable(): MorphTo
     {
         return $this->morphTo();
@@ -54,5 +53,34 @@ class Image extends Model
                 }
                 return $smallest->width < $image->width ? $smallest : $image;
             });
+    }
+
+    public static function fromRawData(Collection $images): void
+    {
+        $now = now();
+        $images = $images->map(fn($image) => [
+            ...$image,
+            'id' => Uuid::uuid7($now)->toString(),
+        ]);
+        $values = $images->map(
+            fn($image) => [
+                'id' => $image['id'],
+                'url' => $image['url'],
+                'width' => $image['width'],
+                'height' => $image['height'],
+            ]
+        )->toArray();
+
+        self::upsert($values, 'url');
+
+        $imageables = $images->map(fn($image) => [
+            'image_id' => $image['id'],
+            'imageable_id' => $image['imageable_id'],
+            'imageable_type' => $image['imageable_type'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->toArray();
+
+        DB::table('imageables')->insertOrIgnore($imageables);
     }
 }

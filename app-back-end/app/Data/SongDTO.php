@@ -20,8 +20,8 @@ class SongDTO extends Data
      */
     public function __construct(
         public string          $id,
-        public string          $spotifyId,
         public string          $name,
+        public ?int            $order,
         public Collection      $artist_name,
         public string          $album_name,
         public ?string         $albumCoverUrl,
@@ -36,8 +36,8 @@ class SongDTO extends Data
     {
         return new self(
             $song->id,
-            $song->spotify_id,
             $songEdit?->name ?? $song->name,
+            $song->order ?? null,
             $song->artists?->pluck("name") ?: collect('Unknown Artist'),
             $song->album->name,
             Image::getSmallestSquare(collect($song->album->images))?->url,
@@ -49,6 +49,6 @@ class SongDTO extends Data
 
     public function spotifyUrl(): string
     {
-        return "https://open.spotify.com/track/$this->spotifyId";
+        return "https://open.spotify.com/track/$this->id";
     }
 }

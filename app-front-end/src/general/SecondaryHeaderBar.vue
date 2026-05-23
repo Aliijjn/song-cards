@@ -1,5 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div id="breadcrumb-teleport" class="mt-3" />
+  <div class="h-[36px] pt-3">
+    <div id="breadcrumb-teleport" />
+  </div>
 </template>

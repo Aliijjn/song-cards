@@ -11,7 +11,9 @@ use Illuminate\Database\Seeder;
 class CurationSeeder extends Seeder
 {
     const PLAYLIST_IDS = [
-        '1DTzz7Nh2rJBnyFbjsH1Mh'
+        '6PorhgXeGPsCWNkfBo21nc', // Personal Top 100
+        '1DTzz7Nh2rJBnyFbjsH1Mh', // Radio 2 Top 2000
+        '2T5yN80KfNFxeFAwDyqhjo', // RYM Top 1000 <- unique constraint
     ];
 
     /**

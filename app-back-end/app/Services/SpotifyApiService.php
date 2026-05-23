@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
+use App\Models\Album;
+use App\Models\Artist;
 use App\Models\Curation;
+use App\Models\Image;
 use App\Models\Song;
 use Illuminate\Http\Client\HttpClientException;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Ramsey\Uuid\Uuid;
 
 class SpotifyApiService
 {
@@ -19,6 +20,7 @@ class SpotifyApiService
     {
         $response = Http::asForm()
             ->retry(3, 1000)
+            ->timeout(3)
             ->post('https://accounts.spotify.com/api/token', [
                 'grant_type' => 'client_credentials',
                 'client_id' => env('SPOTIFY_CLIENT_ID'),
@@ -71,7 +73,7 @@ class SpotifyApiService
     public function getPlaylists(Collection $ids): Collection
     {
         ini_set('memory_limit', '-1');
-        $now = now();
+
         $playlists = collect(
             Http::pool(function ($pool) use ($ids) {
                 $ids->unique()->each(function ($id) use ($pool) {
@@ -90,62 +92,51 @@ class SpotifyApiService
         $requests = $playlists->flatMap(function ($playlist) {
             $tracks = $playlist['tracks'];
 
-            if ($tracks['total'] <= 100) {
-                return [];
-            }
-
             $requestBase = str_replace('offset=100&limit=100', '', $tracks['next']);
-            ray($requestBase);
             $requests = collect();
-            for ($i = 0; $i < $tracks['total']; $i += 100) {
+            for ($i = 100; $i < $tracks['total']; $i += 100) {
                 $requests["{$playlist['id']}:$i"] = "{$requestBase}offset={$i}&limit=100";
             }
             return $requests;
         });
-        ray($requests);
-
         $responses = collect(Http::pool(fn($pool) => $requests->mapWithKeys(fn($url, $key) => [
             $key => $pool->as($key)
                 ->withToken($this->token)
                 ->retry(3, 1000)
-                ->timeout(3)
                 ->get($url)
         ])))
             ->filter(fn(Response|HttpClientException $response) => $response instanceof Response && $response->successful())
-            ->mapWithKeys(fn(Response $response, $key) => [$key => $response->json()]);
+            ->mapWithKeys(fn(Response $response, $key) => [$key => $response->json()])
+            ->merge($playlists->mapWithKeys(fn($playlist) => ["{$playlist['id']}:0" => $playlist['tracks']]));
 
-        ray($responses, $responses->first()['items'][0]['track'] ?? null);
+        ray($responses);
 
-        $songs = $responses->flatMap(
-            fn($response, $key) => collect($response['items'])
+        $songs = $responses
+            ->flatMap(fn($response, $key) => collect($response['items'])
                 ->mapWithKeys(fn($item, $i) => ["$key:$i" => $item['track']])
-        );
+            )
+            ->filter(fn($song) => $song['id']);
+        $albums = $songs
+            ->pluck('album')
+            ->unique('id')
+            ->filter(fn($album) => $album['id']);
+        $artists = $albums
+            ->flatMap(fn($album) => $album['artists'])
+            ->concat($songs->flatMap(fn($song) => $song['artists']))
+            ->unique('id')
+            ->filter(fn($artist) => $artist['id']);
+        $images = $albums->flatMap(fn($album) => collect($album['images'])->map(fn($image) => [
+            ...$image,
+            'imageable_id' => $album['id'],
+            'imageable_type' => Album::class,
+        ]));
 
-        ray($songs);
-        $songMap = Song::addBatch($songs);
+        Artist::fromRawData($artists);
+        Album::fromRawData($albums);
+        Image::fromRawData($images);
+        Song::fromRawData($songs);
+        Curation::fromRawData($playlists, $songs);
 
-        $curations = $playlists->mapWithKeys(fn($playlist) => [
-            $playlist['id'] => [
-                'id' => Uuid::uuid7($now)->toString(),
-                'name' => $playlist['name'],
-                'description' => $playlist['description'], // todo: beware of sketchy HTML
-                'system_generated' => true,
-                'created_by' => null,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]
-        ]);
-
-        ray($songMap);
-
-        Curation::insert($curations->toArray());
-
-        $songs->groupBy(fn($song, $key) => strstr($key, ':', true))
-            ->each(function (Collection $songs, $playlistId) use ($curations, $songMap) {
-                $curation = Curation::whereId($curations[$playlistId]['id'])->firstOrFail();
-                $curation->songs()->syncWithoutDetaching($songs->map(fn($song) => $songMap[$song['id']]['uuid']));
-            });
-
-        return collect($curations);
+        return collect();
     }
 }

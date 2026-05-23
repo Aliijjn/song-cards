@@ -60,11 +60,11 @@ class Export extends Model
         $curationDto = CurationDTO::fromModel($curation);
         $cardData = $curationDto->songs
             ->map(fn(SongDTO $song) => [
-                'id' => $song->spotifyId,
+                'id' => $song->id,
                 'name' => $song->name,
                 'artist' => $song->artist_name->join(', '),
                 'release_year' => $song->release_date->year,
-                'color' => ColorService::fromString($song->spotifyId),
+                'color' => ColorService::fromString($song->id),
                 'url' => $song->spotifyUrl(),
             ])
             ->chunk(self::CARD_PAGE_COUNT)

@@ -27,6 +27,7 @@ class CurationController extends Controller
 {
     public function all(Request $request): JsonResponse
     {
+        ini_set('memory_limit', '512M');
         return new JsonResponse(
             CurationDTO::collect(
                 Curation::orderByDesc('updated_at')

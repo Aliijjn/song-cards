@@ -50,11 +50,37 @@ class Song extends DefaultModel
 
     private static function parseName(string $name): string
     {
-        $clutter = ['remaster', 'original', 'raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit', 'feat', 'ii.', 'live at', 'with the', 'bonus track', '(with'];
+        $clutter = ['remaster', 'original', ' raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit', 'feat', 'including', 'ii.', 'live at', 'with the', 'bonus track', '(with'];
 
         return collect(preg_split('#(?=[\(\-/])#', $name))
             ->filter(fn(string $name) => !Str::contains(Str::lower($name), $clutter))
             ->join('') ?? $name; // in case of false positive, re-add the whole name
+    }
+
+    public static function fromRawData(Collection $songs): void
+    {
+        $now = now();
+        $values = $songs->map(fn($song) => [
+            'id' => $song['id'],
+            'name' => static::parseName($song['name']),
+            'album_id' => $song['album']['id'],
+            'duration_ms' => $song['duration_ms'],
+            'popularity' => $song['popularity'],
+            'track_number' => $song['track_number'],
+            'errors' => SongErrorEnum::fromTrack($song),
+        ])->toArray();
+
+        Song::upsert($values, ['id']);
+
+        $artistSong = $songs->flatMap(fn($song) => collect($song['artists'])->map(fn($artist) => [
+            'artist_id' => $artist['id'],
+            'song_id' => $song['id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]))->toArray();
+        ray($artistSong);
+
+        DB::table('artist_song')->insertOrIgnore($artistSong);
     }
 
     /**
@@ -82,8 +108,7 @@ class Song extends DefaultModel
         $new->chunk(100)->each(
             fn($chunk) => Song::insert($chunk->map(
                 fn($song) => [
-                    'id' => $song['uuid'],
-                    'spotify_id' => $song['id'],
+                    'id' => $song['id'],
                     'name' => static::parseName($song['name']),
                     'album_id' => $tempAlbumId,
                     'duration_ms' => $song['duration_ms'],

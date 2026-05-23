@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Tools\Classes\DefaultModel;
+use App\Tools\Classes\DefaultModelUuid;
 
-class SongEdit extends DefaultModel
+class SongEdit extends DefaultModelUuid
 {
     protected function casts(): array
     {
