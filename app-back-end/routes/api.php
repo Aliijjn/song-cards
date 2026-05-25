@@ -22,15 +22,18 @@ Route::middleware(['api'])
         Route::prefix('curations')->group(function () {
             Route::get('/', [CurationController::class, 'all']);
             Route::get('/{curation}', [CurationController::class, 'index']);
-            Route::put('/{curation}', [CurationController::class, 'update']);
+            Route::get('/{curation}/export', [CurationController::class, 'export']);
+
+            Route::post('/', [CurationController::class, 'create']);
+            Route::post('/{curation}/from-songs', [CurationController::class, 'createFromSongs']);
             Route::post('/{curation}/copy', [CurationController::class, 'copy']);
             Route::post('/{curation}/combine', [CurationController::class, 'combine']);
-            Route::get('/{curation}/export', [CurationController::class, 'export']);
-            Route::post('/', [CurationController::class, 'create']);
 
             Route::delete('/{curation}', [CurationController::class, 'delete']);
-            Route::delete('/{curation}/{song}', [CurationController::class, 'deleteSong']);
+            Route::delete('/{curation}/song/{song}', [CurationController::class, 'deleteSong']);
+            Route::delete('/{curation}/songs', [CurationController::class, 'deleteSongs']);
 
+            Route::put('/{curation}', [CurationController::class, 'update']);
             Route::put('/{curation}/edit', [CurationController::class, 'addEdit']);
         });
 

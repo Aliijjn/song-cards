@@ -3,8 +3,8 @@ import { AudioLines } from 'lucide-vue-next';
 </script>
 
 <template>
-  <div class="flex gap-[6px] items-center">
-    <AudioLines class="size-8 text-primary" />
-    <Label class="text-[22px] pt-[3px]"> Spoticards </Label>
+  <div class="flex gap-[4px] items-center">
+    <AudioLines class="size-8 stroke-[2.2] text-primary" />
+    <Label class="text-[24px] pt-[3px] font-light"> Spoticards </Label>
   </div>
 </template>

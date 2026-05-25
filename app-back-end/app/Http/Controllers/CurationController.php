@@ -5,28 +5,28 @@ namespace App\Http\Controllers;
 use App\Data\CurationCombineDTO;
 use App\Data\CurationCopyDTO;
 use App\Data\CurationCreationDTO;
+use App\Data\CurationCreationFromSongsDTO;
 use App\Data\SongEditCreationDTO;
 use App\Data\CurationDTO;
 use App\Data\CurationUpdateDTO;
-use App\Models\Album;
-use App\Models\Artist;
 use App\Models\Curation;
 use App\Models\Export;
 use App\Models\Song;
 use App\Models\SongEdit;
-use App\Models\User;
 use App\Services\SpotifyApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Ramsey\Uuid\Uuid;
 
 class CurationController extends Controller
 {
     public function all(Request $request): JsonResponse
     {
+        /**
+         * TODO: Spatie's data package loves RAM (reflection for each song)
+         * Either fix this or don't use spatie here
+         */
+
         ini_set('memory_limit', '512M');
         return new JsonResponse(
             CurationDTO::collect(
@@ -41,7 +41,6 @@ class CurationController extends Controller
 
     public function index(Curation $curation): JsonResponse
     {
-        ray($curation);
         return new JsonResponse(
             CurationDTO::fromModel(
                 $curation->load(['songs', 'songs.album.images', 'songEdits'])
@@ -85,117 +84,21 @@ class CurationController extends Controller
         );
     }
 
-    // todo: refactor this mess, as it's unreadable and has a tendency to crash when artists already exist
     public function create(Request $request, SpotifyApiService $apiService): JsonResponse
     {
-        $curationId = null;
+        $curation = CurationCreationDTO::from($request->get('curation'));
 
-        DB::transaction(function () use ($request, $apiService, &$curationId) {
+        $curationIds = $apiService->getPlaylists($curation->playlistIds, $curation);
 
-            $now = now();
+        return new JsonResponse($curationIds->first());
+    }
 
-            $curation = CurationCreationDTO::from($request->get('curation'));
+    public function createFromSongs(Curation $curation, Request $request): JsonResponse
+    {
+        $creationDto = CurationCreationFromSongsDTO::from($request->input('creationDto'));
+        $id = Curation::fromSongs($curation, $creationDto);
 
-            ray($curation);
-
-            // todo: change to http pool
-            $songs = collect($curation->playlistIds)
-                ->flatMap(fn($playlistId) => collect(Http::withToken(User::first()->spotify_access_token)
-                    ->get("https://api.spotify.com/v1/playlists/$playlistId/tracks")
-                    ->json()['items'])
-                )
-                ->pluck('track')
-                ->unique('id');
-
-            ray($songs);
-
-            $albums = $apiService->getAlbums($songs->pluck('album.id')
-                ->unique());
-
-            $artists = $apiService->getArtists(
-                $albums->flatMap(fn($album) => collect($album['artists'])->pluck('id'))
-                    ->unique()
-            );
-
-            $genres = $artists->flatMap(fn($artist) => $artist['genres'])
-                ->unique();
-
-            function getImages(Collection $assets): Collection
-            {
-                return $assets->flatMap(
-                    fn($asset) => collect($asset['images'])->map(
-                        fn($image) => [
-                            'asset_id' => $asset['id'],
-                            'asset_type' => ('App\Models\\' . ucfirst($asset['type'])),
-                            ...$image,
-                        ]
-                    )
-                );
-            }
-
-            $images = collect([
-                getImages($albums),
-                getImages($artists),
-            ])
-                ->flatten(1)
-                ->unique('url');
-
-            ray($songs, $artists, $albums, $genres, $images);
-
-            Artist::fromArtistsRaw($artists);
-
-            Album::fromAlbumsRaw($albums, $artists->pluck('id'));
-
-            $imagesMap = $images->map(fn($image) => [
-                ...$image,
-                'id' => Uuid::uuid7(now())->toString(),
-                'created_at' => $now,
-                'updated_at' => $now,
-                'asset_id' => match ($image['asset_type']) {
-                    'App\Models\Artist' => Artist::whereSpotifyId($image['asset_id'])->first()->id,
-                    'App\Models\Album' => Album::whereSpotifyId($image['asset_id'])->first()->id,
-                }
-            ]);
-            $imagesMap->map(fn($image) => [
-                'id' => $image['id'],
-                'url' => $image['url'],
-                'width' => $image['width'],
-                'height' => $image['height'],
-                'created_at' => $image['created_at'],
-                'updated_at' => $image['updated_at'],
-            ])
-                ->chunk(100)
-                ->each(fn($chunk) => DB::table('images')->insert(ray()->pass($chunk)->toArray()));
-
-            $imagesMap->map(fn($imageable) => [
-                'image_id' => $imageable['id'],
-                'imageable_id' => $imageable['asset_id'],
-                'imageable_type' => $imageable['asset_type'],
-                'created_at' => $imageable['created_at'],
-                'updated_at' => $imageable['created_at'],
-            ])
-                ->chunk(100)
-                ->each(fn($chunk) => DB::table('imageables')->insert($chunk->toArray()));
-
-            Song::fromSongsRaw($songs);
-
-            $curationId = Curation::create([
-                'name' => $curation->name,
-                'description' => $curation->description,
-                'created_by' => $curation->userId,
-            ])->id;
-
-            $songs->map(fn($song) => [
-                'curation_id' => $curationId,
-                'song_id' => Song::whereSpotifyId($song['id'])->first()->id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ])
-                ->chunk(100)
-                ->map(fn($chunk) => DB::table('curation_song')->insert($chunk->toArray()));
-        });
-
-        return new JsonResponse($curationId);
+        return new JsonResponse($id, 201);
     }
 
     public function delete(Curation $curation): JsonResponse
@@ -205,7 +108,32 @@ class CurationController extends Controller
 
     public function deleteSong(Curation $curation, Song $song): JsonResponse
     {
-        return new JsonResponse(status: $curation->songs()->detach($song->id) ? 204 : 404);
+        $curation->songs()->detach($song->id);
+        $curation->songs()
+            ->orderByPivot('order')
+            ->get()
+            ->map(fn($song, $i) => $curation->songs()->updateExistingPivot(
+                $song->id,
+                ['order' => $i]
+            ));
+
+        return new JsonResponse(status: 204);
+    }
+
+    public function deleteSongs(Curation $curation, Request $request): JsonResponse
+    {
+        $songIds = $request->input('songIds');
+
+        $curation->songs()->detach($songIds);
+        $curation->songs()
+            ->orderByPivot('order')
+            ->get()
+            ->map(fn($song, $i) => $curation->songs()->updateExistingPivot(
+                $song->id,
+                ['order' => $i]
+            ));
+
+        return new JsonResponse(status: 204);
     }
 
     public function addEdit(Curation $curation, Request $request): JsonResponse

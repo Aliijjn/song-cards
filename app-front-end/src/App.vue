@@ -9,7 +9,7 @@ import SecondaryHeaderBar from '@/general/SecondaryHeaderBar.vue';
       <HeaderBar />
     </div>
     <div class="grow flex justify-center min-h-0 px-5 pt-0 overflow-y-scroll">
-      <div class="flex flex-col gap-5 max-w-[900px] w-full">
+      <div class="flex flex-col max-w-[900px] w-full">
         <SecondaryHeaderBar />
         <RouterView class="grow-0" />
       </div>

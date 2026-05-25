@@ -37,7 +37,7 @@ class SongDTO extends Data
         return new self(
             $song->id,
             $songEdit?->name ?? $song->name,
-            $song->order ?? null,
+            $song->pivot?->order ?? null,
             $song->artists?->pluck("name") ?: collect('Unknown Artist'),
             $song->album->name,
             Image::getSmallestSquare(collect($song->album->images))?->url,

@@ -42,7 +42,7 @@ async function runExport() {
   <CopyCurationDialog v-model:is-open="isCopyModalOpen" :curation="curation" />
   <CombineCurationDialog v-model:is-open="isCombineModalOpen" :current-curation-id="curation.id" />
 
-  <div class="flex flex-col gap-9">
+  <div class="flex flex-col gap-9 mt-2">
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
         <Label class="text-subtitle whitespace-nowrap">Export</Label>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { CircleAlert, Pencil, Trash2, Funnel } from 'lucide-vue-next';
+import { CircleAlert, Pencil, Trash2, Funnel, Plus, ListCheck, ListX } from 'lucide-vue-next';
 import { Table, TableBody, TableCell, TableEmpty, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import CurationDTO = App.Data.CurationDTO;
@@ -16,14 +16,18 @@ import {
   DropdownMenuContent,
 } from '@/components/ui/dropdown-menu';
 import SelectInput from '@/general/SelectInput.vue';
-import { NumberField } from '@/components/ui/number-field';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card } from '@/components/ui/card';
+import CreateCurationFromSongsDialog from '@/pages/curations/components/CreateCurationFromSongsDialog.vue';
 
 const curation = defineModel<CurationDTO>({ required: true });
 const isLoading = defineModel<boolean>('isLoading', { required: true });
 const emit = defineEmits(['reload']);
 
 const isSongEditOpen = ref(false);
+const isSongCreationOpen = ref(false);
 const selectedSong = ref<SongDTO | null>(null);
+const selectedSongIds = ref<Set<string>>(new Set());
 const maxVisible = ref(50);
 const search = ref('');
 const errorFilter = ref<boolean | null>(null);
@@ -50,13 +54,37 @@ const filteredSongs = computed(() => {
 });
 const visibleSongs = computed(() => filteredSongs.value.slice(0, maxVisible.value));
 
-async function deleteSong(songId: string) {
+const hasSelections = computed(() => selectedSongIds.value.size !== 0);
+
+const allSelected = computed(() => selectedSongIds.value.size !== filteredSongs.value.length);
+
+function selectAll() {
+  selectedSongIds.value = new Set(filteredSongs.value.map((song) => song.id));
+}
+
+function deselectAll() {
+  selectedSongIds.value.clear();
+}
+
+function toggleSongSelection(id: string) {
+  if (selectedSongIds.value.has(id)) {
+    selectedSongIds.value.delete(id);
+  } else {
+    selectedSongIds.value.add(id);
+  }
+}
+
+async function deleteSelectedSongs() {
   if (!curation.value) return;
 
-  const response = await CurationAPI.deleteSong(curation.value.id, songId);
+  const response = await CurationAPI.deleteSongs(
+    curation.value.id,
+    Array.from(selectedSongIds.value)
+  );
 
   if (response.status === 'success') {
-    curation.value.songs = curation.value.songs.filter((song) => song.id !== songId);
+    emit('reload');
+    deselectAll();
   }
 }
 
@@ -103,11 +131,17 @@ onBeforeUnmount(() => {
     @reload="emit('reload')"
   />
 
-  <div class="flex gap-2 mb-5">
+  <CreateCurationFromSongsDialog
+    v-model:is-open="isSongCreationOpen"
+    :curation-id="curation.id"
+    :song-ids="selectedSongIds"
+  />
+
+  <div class="flex gap-2 mb-2">
     <SearchBar v-model="search" size="lg" class="w-full" />
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
-        <Button size="lg" variant="outline">
+        <Button size="lg">
           <Funnel />
           Filters
         </Button>
@@ -150,52 +184,93 @@ onBeforeUnmount(() => {
     </DropdownMenu>
   </div>
 
-  <Table>
-    <TableEmpty v-if="!filteredSongs.length"> No songs found</TableEmpty>
-    <TableBody v-else>
-      <TableRow v-for="(song, index) in visibleSongs" :key="song.id">
-        <!-- Image, Title & Artist -->
-        <TableCell class="max-w-[60%]">
-          <div class="flex flex-row items-center gap-3 max-w-[min(500px,50vw)]">
-            <img :src="song.albumCoverUrl" alt="" class="h-15 w-15 rounded object-cover" />
-            <div class="flex flex-col truncate">
-              <div class="font-medium">{{ song.name }}</div>
-              <div class="opaque">{{ song.artist_name.join(', ') }}</div>
+  <div class="rounded-md overflow-hidden">
+    <Table>
+      <TableEmpty v-if="!filteredSongs.length"> No songs found</TableEmpty>
+      <TableBody v-else>
+        <TableRow
+          v-for="(song, index) in visibleSongs"
+          :key="song.id"
+          :class="{ 'bg-card': selectedSongIds.has(song.id) }"
+          @click="toggleSongSelection(song.id)"
+        >
+          <!-- Image, Title & Artist -->
+          <TableCell class="max-w-[60%]">
+            <div class="flex flex-row items-center max-w-[min(500px,50vw)]">
+              <div class="flex justify-end items-center w-6 h-6 mr-4">
+                <Checkbox
+                  v-if="hasSelections"
+                  :model-value="selectedSongIds.has(song.id)"
+                  class="absolute"
+                />
+                <span v-else-if="song.order !== null" class="font-medium font-mono absolute">
+                  {{ song.order + 1 }}
+                </span>
+              </div>
+              <img :src="song.albumCoverUrl" alt="" class="size-14 mr-3 rounded object-cover" />
+              <div class="flex flex-col truncate">
+                <span class="font-medium">
+                  {{ song.name }}
+                </span>
+                <span class="opaque">{{ song.artist_name.join(', ') }}</span>
+              </div>
             </div>
-          </div>
-        </TableCell>
+          </TableCell>
 
-        <!-- Year -->
-        <TableCell>
-          {{ dayjs(song.release_date).year() }}
-        </TableCell>
+          <!-- Year -->
+          <TableCell>
+            {{ dayjs(song.release_date).year() }}
+          </TableCell>
 
-        <!-- Errors -->
-        <TableCell>
-          <div class="flex items-center justify-end gap-1 text-destructive">
-            <CircleAlert v-if="song.errors.length" class="size-3.5 pb-[2px]" />
-            {{ getSongErrorCount(song.errors.length) }}
-          </div>
-        </TableCell>
+          <!-- Errors -->
+          <TableCell>
+            <div class="flex items-center justify-end gap-1 text-destructive">
+              <CircleAlert v-if="song.errors.length" class="size-3.5 pb-[2px]" />
+              {{ getSongErrorCount(song.errors.length) }}
+            </div>
+          </TableCell>
 
-        <!-- Actions -->
-        <TableCell>
-          <div class="flex justify-end gap-2">
-            <Button size="icon" variant="outline" :disabled="isLoading" @click="editSong(song)">
-              <Pencil />
-            </Button>
-            <Button
-              size="icon"
-              variant="destructive"
-              :disabled="isLoading"
-              @click="deleteSong(song.id)"
-            >
-              <Trash2 />
-            </Button>
-          </div>
-        </TableCell>
-      </TableRow>
-    </TableBody>
-  </Table>
+          <!-- Actions -->
+          <TableCell>
+            <div class="flex justify-end gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                :disabled="isLoading"
+                @click.stop="editSong(song)"
+              >
+                <Pencil />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </div>
   <div v-if="maxVisible < filteredSongs.length" ref="loadMoreTrigger" class="h-2" />
+
+  <div v-if="hasSelections" class="absolute bottom-4 flex justify-center gap-2 w-[900px]">
+    <Card class="p-0">
+      <Button v-if="allSelected" size="lg" @click="selectAll">
+        <ListCheck />
+        Select All
+      </Button>
+      <Button v-else size="lg" @click="deselectAll">
+        <ListX />
+        Deselect All
+      </Button>
+    </Card>
+    <Card class="p-0">
+      <Button size="lg" @click="isSongCreationOpen = true">
+        <Plus />
+        New Curation
+      </Button>
+    </Card>
+    <Card class="p-0">
+      <Button variant="destructive" size="lg" @click="deleteSelectedSongs">
+        <Trash2 />
+        Delete
+      </Button>
+    </Card>
+  </div>
 </template>

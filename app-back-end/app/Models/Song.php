@@ -50,11 +50,11 @@ class Song extends DefaultModel
 
     private static function parseName(string $name): string
     {
-        $clutter = ['remaster', 'original', ' raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit', 'feat', 'including', 'ii.', 'live at', 'with the', 'bonus track', '(with'];
+        $clutter = ['remaster', 'original', 'raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit', 'feat', 'including', 'ii.', 'live at', 'with the', 'bonus track'];
 
         return collect(preg_split('#(?=[\(\-/])#', $name))
             ->filter(fn(string $name) => !Str::contains(Str::lower($name), $clutter))
-            ->join('') ?? $name; // in case of false positive, re-add the whole name
+            ->join('') ?: $name; // in case of false positive, re-add the whole name
     }
 
     public static function fromRawData(Collection $songs): void

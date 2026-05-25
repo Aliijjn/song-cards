@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Data\CurationCombineDTO;
 use App\Data\CurationCopyDTO;
+use App\Data\CurationCreationDTO;
+use App\Data\CurationCreationFromSongsDTO;
 use App\Tools\Classes\DefaultModelUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -30,24 +32,67 @@ class Curation extends DefaultModelUuid
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public static function fromSongs(
+        Curation                     $originalCuration,
+        CurationCreationFromSongsDTO $creationDto,
+    ): string
+    {
+        $now = now();
+        $i = 0;
+
+        $curation = static::create([
+            'id' => Uuid::uuid7($now)->toString(),
+            'name' => $creationDto->name,
+            'description' => $creationDto->description,
+            'system_generated' => false,
+            'created_by' => $creationDto->userId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $songs = $originalCuration
+            ->songs()
+            ->orderByPivot('order')
+            ->whereIn('id', $creationDto->songIds)
+            ->get()
+            ->map(function ($song) use (&$i, $now, $curation) {
+                return [
+                    'curation_id' => $curation->id,
+                    'song_id' => $song->id,
+                    'order' => $i++,
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ];
+            });
+        // todo: doesn't copy songedit
+
+        $curation->songs()->sync($songs);
+
+        return $curation->id;
+    }
+
     private function copyTo(Curation $to, ?int $maxCount = null): void
     {
         $this->loadMissing(['songs', 'songEdits']);
 
+        $i = $to->songs->count();
+        ray($to, $this);
         $now = now();
         $songs = $this->songs
             ->when(
                 $maxCount !== null && $maxCount > 0,
                 fn($query) => $query->random($maxCount)
             )
-            ->mapWithKeys(fn($song) => [
-                $song->id => [
-                    'curation_id' => $to->id,
-                    'song_id' => $song->id,
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ]
-            ]);
+            ->mapWithKeys(function ($song) use (&$i, $now, $to) {
+                return [
+                    $song->id => [
+                        'curation_id' => $to->id,
+                        'song_id' => $song->id,
+                        'order' => $i++,
+                        'created_at' => $now,
+                        'updated_at' => $now
+                    ]
+                ];
+            });
         $selectedSongIds = $songs->keys();
         $songEdits = $this->songEdits
             ->whereIn('song_id', $selectedSongIds)
@@ -60,8 +105,10 @@ class Curation extends DefaultModelUuid
                 ]
             ]);
 
+
         $to->songs()->syncWithoutDetaching($songs);
         $to->songEdits()->syncWithoutDetaching($songEdits);
+        ray($to->songs, $songs);
     }
 
     public function copy(CurationCopyDTO|CurationCombineDTO $copyDto): self
@@ -96,7 +143,7 @@ class Curation extends DefaultModelUuid
         return $newCuration;
     }
 
-    public static function fromRawData(Collection $playlists, Collection $songs): void
+    public static function fromRawData(Collection $playlists, Collection $songs): Collection
     {
         $now = now();
         $values = $playlists->mapWithKeys(fn($playlist) => [
@@ -109,8 +156,7 @@ class Curation extends DefaultModelUuid
                 'created_at' => $now,
                 'updated_at' => $now,
             ]
-        ])->toArray();
-        ray($songs);
+        ]);
         $curationSong = $songs->map(function ($song, $key) use ($values, $now) {
             $split = explode(':', $key);
 
@@ -123,9 +169,49 @@ class Curation extends DefaultModelUuid
             ];
         })
             ->toArray();
-        ray($curationSong);
 
-        Curation::insert($values);
+        Curation::insert($values->toArray());
         DB::table('curation_song')->insertOrIgnore($curationSong);
+
+        return $values->pluck('id');
+    }
+
+    public static function oneFromRawData(CurationCreationDTO $curation, Collection $songs): Collection
+    {
+        $now = now();
+        $curationId = Uuid::uuid7($now)->toString();
+
+        Curation::insertGetId([
+            'id' => $curationId,
+            'name' => $curation->name,
+            'description' => $curation->description,
+            'system_generated' => false,
+            'created_by' => $curation->userId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $i = 0;
+        $curationSong = $songs
+            ->sortBy(function ($song, $key) {
+                $split = explode(':', $key);
+
+                return (int)$split[1] + (int)$split[2];
+            })
+            ->sortBy(fn($song, $key) => strstr($key, ':', true))
+            ->map(function ($song) use (&$i, $curationId, $now) {
+                return [
+                    'curation_id' => $curationId,
+                    'song_id' => $song['id'],
+                    'order' => $i++,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            })
+            ->toArray();
+
+        DB::table('curation_song')->insertOrIgnore($curationSong);
+
+        return collect([$curationId]);
     }
 }

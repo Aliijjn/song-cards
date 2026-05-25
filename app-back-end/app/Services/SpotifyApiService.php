@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\CurationCreationDTO;
 use App\Models\Album;
 use App\Models\Artist;
 use App\Models\Curation;
@@ -70,7 +71,7 @@ class SpotifyApiService
             ->unique(fn($album) => $album['id']);
     }
 
-    public function getPlaylists(Collection $ids): Collection
+    public function getPlaylists(Collection $ids, ?CurationCreationDTO $curation = null): Collection
     {
         ini_set('memory_limit', '-1');
 
@@ -135,8 +136,13 @@ class SpotifyApiService
         Album::fromRawData($albums);
         Image::fromRawData($images);
         Song::fromRawData($songs);
-        Curation::fromRawData($playlists, $songs);
 
-        return collect();
+        if ($curation) {
+            $curationIds = Curation::oneFromRawData($curation, $songs);
+        } else {
+            $curationIds = Curation::fromRawData($playlists, $songs);
+        }
+
+        return $curationIds;
     }
 }

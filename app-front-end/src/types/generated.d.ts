@@ -18,6 +18,12 @@ description: string | null;
 userId: number;
 playlistIds: Array<any>;
 };
+export type CurationCreationFromSongsDTO = {
+name: string;
+description: string | null;
+userId: number;
+songIds: Array<any>;
+};
 export type CurationDTO = {
 id: string;
 name: string;
@@ -68,8 +74,8 @@ imageUrl: string;
 };
 export type SongDTO = {
 id: string;
-spotifyId: string;
 name: string;
+order: number | null;
 artist_name: Array<any>;
 album_name: string;
 albumCoverUrl: string | null;

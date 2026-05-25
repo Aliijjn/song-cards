@@ -40,7 +40,6 @@ async function load() {
     router.push('/404');
   }
 
-  selectedTab.value = 'curation_details';
   isLoading.value = false;
 }
 </script>
@@ -51,7 +50,7 @@ async function load() {
     <span v-if="isLoading && !curation"> Loading </span>
     <span v-else-if="!curation"> Couldn't get curation </span>
     <Tabs v-else v-model="selectedTab" class="gap-0">
-      <TabsList class="mb-6 w-full h-10">
+      <TabsList class="mb-4 w-full h-10">
         <TabsTrigger class="w-full" value="curation_details"> Curation Details</TabsTrigger>
         <TabsTrigger class="w-full" value="song_details"> Song Details</TabsTrigger>
         <TabsTrigger class="w-full" value="advanced_actions"> Advanced Actions</TabsTrigger>

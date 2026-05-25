@@ -8,10 +8,12 @@ import CurationAPI from '@/pages/curations/api.ts';
 import CurationTable from '@/pages/curations/components/CurationTable.vue';
 import Breadcrumbs from '@/general/Breadcrumbs.vue';
 import SearchBar from '@/general/SearchBar.vue';
+import CreateCurationDialog from '@/pages/curations/components/CreateCurationDialog.vue';
 
 const curations = ref<CurationDTO[]>([]);
 const isLoading = ref(true);
 const search = ref('');
+const creatingNew = ref(false);
 
 const visibleCurations = computed(() => {
   if (!search.value) {
@@ -35,10 +37,12 @@ onMounted(async () => {
 <template>
   <Breadcrumbs :breadcrumbs="[{ text: 'Curations' }]" />
 
-  <div class="flex flex-col gap-4 max-w-[900px]">
+  <CreateCurationDialog v-model:is-open="creatingNew" />
+
+  <div class="flex flex-col gap-2 max-w-[900px]">
     <div class="flex justify-between gap-2">
       <SearchBar v-model="search" class="h-[43px] w-full" />
-      <Button size="lg" @click="router.push('/curations/create')">
+      <Button size="lg" @click="creatingNew = true">
         <ListPlus />
         Create Curation
       </Button>

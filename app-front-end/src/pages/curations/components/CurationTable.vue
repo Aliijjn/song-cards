@@ -54,12 +54,10 @@ function toggle(curationId: string) {
     <TableBody v-else>
       <TableEmpty v-if="!curations.length"> No curations found</TableEmpty>
       <TableRow v-for="curation in curations" :key="curation.id" @click="toggle(curation.id)">
-        <TableCell v-if="selected !== null">
-          <Checkbox :model-value="selected.includes(curation.id)" />
-        </TableCell>
         <TableCell class="flex flex-row items-center gap-3">
+          <Checkbox v-if="selected !== null" :model-value="selected.includes(curation.id)" />
           <div class="flex flex-col truncate">
-            <div>{{ curation.name }}</div>
+            <div class="font-medium">{{ curation.name }}</div>
             <div class="opaque">{{ curation.createdBy }}</div>
           </div>
         </TableCell>
