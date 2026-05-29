@@ -19,6 +19,7 @@ import SelectInput from '@/general/SelectInput.vue';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
 import CreateCurationFromSongsDialog from '@/pages/curations/components/CreateCurationFromSongsDialog.vue';
+import { Label } from '@/components/ui/label';
 
 const curation = defineModel<CurationDTO>({ required: true });
 const isLoading = defineModel<boolean>('isLoading', { required: true });

@@ -20,6 +20,7 @@ import CurationCopyDTO = App.Data.CurationCopyDTO;
 import { Textarea } from '@/components/ui/textarea';
 import CurationAPI from '@/pages/curations/api.ts';
 import { router } from '@/router.ts';
+import { Label } from '@/components/ui/label';
 
 const { curation } = defineProps<{ curation: CurationDTO | undefined }>();
 const isOpen = defineModel<boolean>('isOpen');

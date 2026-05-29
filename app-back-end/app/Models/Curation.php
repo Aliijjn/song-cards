@@ -6,6 +6,7 @@ use App\Data\CurationCombineDTO;
 use App\Data\CurationCopyDTO;
 use App\Data\CurationCreationDTO;
 use App\Data\CurationCreationFromSongsDTO;
+use App\Enum\CurationTypeEnum;
 use App\Tools\Classes\DefaultModelUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,6 +16,10 @@ use Ramsey\Uuid\Uuid;
 
 class Curation extends DefaultModelUuid
 {
+    protected $casts = [
+        'type' => CurationTypeEnum::class,
+    ];
+
     public function songs(): BelongsToMany
     {
         return $this->belongsToMany(Song::class)
@@ -44,7 +49,7 @@ class Curation extends DefaultModelUuid
             'id' => Uuid::uuid7($now)->toString(),
             'name' => $creationDto->name,
             'description' => $creationDto->description,
-            'system_generated' => false,
+            'type'       => CurationTypeEnum::Personal->value,
             'created_by' => $creationDto->userId,
             'created_at' => $now,
             'updated_at' => $now,
@@ -139,8 +144,20 @@ class Curation extends DefaultModelUuid
                 ->get()
                 ->each(fn($curation) => $curation->copyTo($newCuration));
         });
+        $newCuration->recalculateOrder();
 
         return $newCuration;
+    }
+
+    public function recalculateOrder(): void
+    {
+        $this->songs()
+            ->orderByPivot('order')
+            ->get()
+            ->map(fn($song, $i) => $this->songs()->updateExistingPivot(
+                $song->id,
+                ['order' => $i]
+            ));
     }
 
     public static function fromRawData(Collection $playlists, Collection $songs): Collection
@@ -151,7 +168,7 @@ class Curation extends DefaultModelUuid
                 'id' => Uuid::uuid7($now)->toString(),
                 'name' => $playlist['name'],
                 'description' => $playlist['description'], // todo: beware of sketchy HTML
-                'system_generated' => true,
+                'type'             => CurationTypeEnum::Editorial->value,
                 'created_by' => null,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -185,7 +202,7 @@ class Curation extends DefaultModelUuid
             'id' => $curationId,
             'name' => $curation->name,
             'description' => $curation->description,
-            'system_generated' => false,
+            'type'       => CurationTypeEnum::Personal->value,
             'created_by' => $curation->userId,
             'created_at' => $now,
             'updated_at' => $now,

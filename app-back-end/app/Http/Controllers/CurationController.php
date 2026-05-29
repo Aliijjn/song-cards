@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Data\CurationCombineDTO;
+use App\Data\CurationCollectionDTO;
 use App\Data\CurationCopyDTO;
 use App\Data\CurationCreationDTO;
 use App\Data\CurationCreationFromSongsDTO;
 use App\Data\SongEditCreationDTO;
 use App\Data\CurationDTO;
 use App\Data\CurationUpdateDTO;
+use App\Enum\CurationTypeEnum;
 use App\Models\Curation;
 use App\Models\Export;
 use App\Models\Song;
@@ -16,11 +18,12 @@ use App\Models\SongEdit;
 use App\Services\SpotifyApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CurationController extends Controller
 {
-    public function all(Request $request): JsonResponse
+    public function all(): JsonResponse
     {
         /**
          * TODO: Spatie's data package loves RAM (reflection for each song)
@@ -28,15 +31,21 @@ class CurationController extends Controller
          */
 
         ini_set('memory_limit', '512M');
-        return new JsonResponse(
-            CurationDTO::collect(
-                Curation::orderByDesc('updated_at')
-                    ->with(['songs', 'songs.album.images', 'songEdits'])
-                    ->skip($request->query('start', 0))
-                    ->take($request->query('length', 10))
-                    ->get()
-            )
-        );
+
+        $grouped = CurationDTO::collect(
+            Curation::with(['songs', 'songs.album.images', 'songEdits'])->get()
+        )
+            ->groupBy(fn(CurationDTO $curation) => $curation->type->value);
+
+        $sorted = fn(?Collection $group) => ($group ?? collect())
+            ->sortByDesc(fn(CurationDTO $c) => $c->updatedAt)
+            ->values();
+
+        return new JsonResponse(new CurationCollectionDTO(
+            $sorted($grouped[CurationTypeEnum::Personal->value] ?? null),
+            $sorted($grouped[CurationTypeEnum::Editorial->value] ?? null),
+            ($grouped[CurationTypeEnum::Era->value] ?? collect())->sortBy(fn(CurationDTO $c) => $c->name)->values(),
+        ));
     }
 
     public function index(Curation $curation): JsonResponse
@@ -103,19 +112,15 @@ class CurationController extends Controller
 
     public function delete(Curation $curation): JsonResponse
     {
-        return new JsonResponse(status: $curation->delete() ? 204 : 404);
+        $curation->delete();
+
+        return new JsonResponse(status: 204);
     }
 
     public function deleteSong(Curation $curation, Song $song): JsonResponse
     {
         $curation->songs()->detach($song->id);
-        $curation->songs()
-            ->orderByPivot('order')
-            ->get()
-            ->map(fn($song, $i) => $curation->songs()->updateExistingPivot(
-                $song->id,
-                ['order' => $i]
-            ));
+        $curation->recalculateOrder();
 
         return new JsonResponse(status: 204);
     }

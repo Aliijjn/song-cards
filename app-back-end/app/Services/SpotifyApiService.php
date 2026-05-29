@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Data\CurationCreationDTO;
+use App\Enum\CurationTypeEnum;
 use App\Models\Album;
 use App\Models\Artist;
 use App\Models\Curation;
+use App\Models\Genre;
 use App\Models\Image;
 use App\Models\Song;
 use Illuminate\Http\Client\HttpClientException;
@@ -79,16 +81,14 @@ class SpotifyApiService
             Http::pool(function ($pool) use ($ids) {
                 $ids->unique()->each(function ($id) use ($pool) {
                     $pool->withToken($this->token)
-                        ->retry(3, 1000)
-                        ->timeout(3)
+                        ->retry(3, 1000, fn(\Exception $e) => !($e instanceof \Illuminate\Http\Client\RequestException) || $e->response->status() >= 500)
+                        ->timeout(10)
                         ->get("https://api.spotify.com/v1/playlists/$id");
                 });
             })
         )
             ->filter(fn(Response|HttpClientException $response) => $response instanceof Response && $response->successful())
             ->map(fn(Response $response) => $response->json());
-
-        ray($playlists);
 
         $requests = $playlists->flatMap(function ($playlist) {
             $tracks = $playlist['tracks'];
@@ -140,6 +140,9 @@ class SpotifyApiService
         if ($curation) {
             $curationIds = Curation::oneFromRawData($curation, $songs);
         } else {
+            Curation::where('type', CurationTypeEnum::Editorial->value)
+                ->whereIn('name', $playlists->pluck('name'))
+                ->delete();
             $curationIds = Curation::fromRawData($playlists, $songs);
         }
 

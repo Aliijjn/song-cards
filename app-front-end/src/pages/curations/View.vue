@@ -46,7 +46,7 @@ async function load() {
 
 <template>
   <Breadcrumbs :breadcrumbs="breadcrumbs" />
-  <div class="w-full">
+  <div class="w-full" :key="uuid">
     <span v-if="isLoading && !curation"> Loading </span>
     <span v-else-if="!curation"> Couldn't get curation </span>
     <Tabs v-else v-model="selectedTab" class="gap-0">

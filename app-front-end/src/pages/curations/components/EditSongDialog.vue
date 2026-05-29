@@ -17,6 +17,7 @@ import SongDTO = App.Data.SongDTO;
 import dayjs from 'dayjs';
 import { useDebounceFn } from '@vueuse/core';
 import CurationAPI from '@/pages/curations/api.ts';
+import { Label } from '@/components/ui/label';
 
 const song = defineModel<SongDTO | null>({ required: true });
 const isOpen = defineModel<boolean>('isOpen');

@@ -4,6 +4,7 @@ import { Save } from 'lucide-vue-next';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import CurationAPI from '@/pages/curations/api.ts';
 import CurationDTO = App.Data.CurationDTO;
 import CurationUpdateDTO = App.Data.CurationUpdateDTO;
@@ -25,7 +26,7 @@ async function update() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-4">
     <div class="flex flex-col">
       <Label for="title"> Title </Label>
       <Input id="title" v-model="curation.name" />

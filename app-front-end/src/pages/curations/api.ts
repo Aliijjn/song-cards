@@ -1,5 +1,6 @@
 import apiRequest, { type ApiResult } from '@/tools/apiRequest.ts';
 import CurationCreationDTO = App.Data.CurationCreationDTO;
+import CurationCollectionDTO = App.Data.CurationCollectionDTO;
 import CurationDTO = App.Data.CurationDTO;
 import CurationUpdateDTO = App.Data.CurationUpdateDTO;
 import CurationCopyDTO = App.Data.CurationCopyDTO;
@@ -10,8 +11,8 @@ import CurationCreationFromSongsDTO = App.Data.CurationCreationFromSongsDTO;
 export default class CurationAPI {
   private static readonly prefix = '/curations';
 
-  static getMultiple(start?: number, length?: number): Promise<ApiResult<CurationDTO[]>> {
-    return apiRequest(`${this.prefix}`, { method: 'GET', query: { start, length } });
+  static getMultiple(): Promise<ApiResult<CurationCollectionDTO>> {
+    return apiRequest(`${this.prefix}`, { method: 'GET' });
   }
 
   static get(id: string): Promise<ApiResult<CurationDTO>> {

@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Services\SongsToErasService;
 use App\Services\SpotifyApiService;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +12,7 @@ class CurationSeeder extends Seeder
         '6PorhgXeGPsCWNkfBo21nc', // Personal Top 100
         '1DTzz7Nh2rJBnyFbjsH1Mh', // Radio 2 Top 2000
         '2T5yN80KfNFxeFAwDyqhjo', // RYM Top 1000 <- unique constraint
+        '7bZ3CxF3XIzjF636T8nF7R', // Spotify 1950-2026
     ];
 
     /**
@@ -26,5 +25,7 @@ class CurationSeeder extends Seeder
         $playlists = $apiService->getPlaylists(collect(self::PLAYLIST_IDS));
 
         ray($playlists);
+
+        SongsToErasService::run();
     }
 }

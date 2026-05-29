@@ -51,10 +51,11 @@ class Song extends DefaultModel
     private static function parseName(string $name): string
     {
         $clutter = ['remaster', 'original', 'raw', 'mix', 'mono', 'stereo', 'medley', 'extend', 'version', 'album', 'single', 'edit', 'feat', 'including', 'ii.', 'live at', 'with the', 'bonus track'];
+        $parts = collect(preg_split('#(?=[\(\-/])#', $name));
 
-        return collect(preg_split('#(?=[\(\-/])#', $name))
+        return $parts
             ->filter(fn(string $name) => !Str::contains(Str::lower($name), $clutter))
-            ->join('') ?: $name; // in case of false positive, re-add the whole name
+            ->join('') ?: $parts[0]; // in case of false positive, re-add the whole name
     }
 
     public static function fromRawData(Collection $songs): void
@@ -78,128 +79,7 @@ class Song extends DefaultModel
             'created_at' => $now,
             'updated_at' => $now,
         ]))->toArray();
-        ray($artistSong);
 
         DB::table('artist_song')->insertOrIgnore($artistSong);
-    }
-
-    /**
-     * The raw songs from Spotify
-     * @param Collection<array> $raw
-     * A hashmap of: spotifyId => song
-     * @return Collection<string, string>
-     */
-    public static function addBatch(Collection $songs): Collection
-    {
-        $now = now();
-        $songs = $songs->map(function ($song) use ($now) {
-            $songUuid = Song::whereSpotifyId($song['id'])->first()?->id ?? null;
-            $exists = $songUuid !== null;
-
-            return [
-                ...$song,
-                'exists' => $exists,
-                'uuid' => $songUuid ?? Uuid::uuid7($now)->toString(),
-            ];
-        });
-        [$exists, $new] = $songs->partition(fn($song) => $song['exists']);
-        $tempAlbumId = Album::firstOrFail()->id; // todo: remove
-
-        $new->chunk(100)->each(
-            fn($chunk) => Song::insert($chunk->map(
-                fn($song) => [
-                    'id' => $song['id'],
-                    'name' => static::parseName($song['name']),
-                    'album_id' => $tempAlbumId,
-                    'duration_ms' => $song['duration_ms'],
-                    'popularity' => $song['popularity'],
-                    'track_number' => $song['track_number'],
-                    'errors' => SongErrorEnum::fromTrack($song),
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ])->toArray()
-            )
-        );
-
-        return $new->concat($exists)->mapWithKeys(fn($song) => [$song['id'] => $song]);
-    }
-
-    public static function fromSongsRaw(Collection $songs): void
-    {
-        $now = now();
-
-        $spotifySongIds = $songs->pluck('id');
-        $spotifyAlbumIds = $songs->pluck('album.id');
-        $spotifyArtistIds = $songs->flatMap(fn($s) => collect($s['artists'])->pluck('id'))->unique();
-
-        // -----------------------------
-        // Load existing data in bulk
-        // -----------------------------
-        $existingSongs = Song::whereIn('spotify_id', $spotifySongIds)->get()->keyBy('spotify_id');
-        $existingAlbums = Album::whereIn('spotify_id', $spotifyAlbumIds)->get()->keyBy('spotify_id');
-        $existingArtists = Artist::whereIn('spotify_id', $spotifyArtistIds)->get()->keyBy('spotify_id');
-
-        // -----------------------------
-        // Build ID maps (no queries inside loops)
-        // -----------------------------
-        $songIdMap = [];
-        $albumIdMap = [];
-        $artistIdMap = [];
-
-        foreach ($songs as $song) {
-
-            // SONG
-            $songIdMap[$song['id']] = $existingSongs[$song['id']]->id
-                ?? ($songIdMap[$song['id']] ??= Uuid::uuid7()->toString());
-
-            // ALBUM
-            $albumIdMap[$song['album']['id']] = $existingAlbums[$song['album']['id']]->id
-                ?? ($albumIdMap[$song['album']['id']] ??= Uuid::uuid7()->toString());
-
-            // ARTISTS
-            foreach ($song['artists'] as $artist) {
-                $artistIdMap[$artist['id']] = $existingArtists[$artist['id']]->id
-                    ?? ($artistIdMap[$artist['id']] ??= Uuid::uuid7()->toString());
-            }
-        }
-
-        // -----------------------------
-        // Prepare bulk inserts
-        // -----------------------------
-        $songRows = [];
-        $pivotRows = [];
-
-        foreach ($songs as $song) {
-
-            $songRows[] = [
-                'id' => $songIdMap[$song['id']],
-                'spotify_id' => $song['id'],
-                'name' => static::parseName($song['name']),
-                'album_id' => $albumIdMap[$song['album']['id']],
-                'duration_ms' => $song['duration_ms'],
-                'popularity' => $song['popularity'],
-                'track_number' => $song['track_number'],
-                'errors' => SongErrorEnum::fromTrack($song),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-
-            foreach ($song['artists'] as $artist) {
-                $pivotRows[] = [
-                    'song_id' => $songIdMap[$song['id']],
-                    'artist_id' => $artistIdMap[$artist['id']],
-                ];
-            }
-        }
-
-        // -----------------------------
-        // Bulk insert (idempotent-safe if you use unique indexes)
-        // -----------------------------
-        Song::upsert($songRows, ['spotify_id'], ['name', 'album_id', 'duration_ms', 'popularity', 'track_number', 'updated_at']);
-
-        DB::table('artist_song')->upsert(
-            $pivotRows,
-            ['song_id', 'artist_id']
-        );
     }
 }
