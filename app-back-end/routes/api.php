@@ -21,6 +21,7 @@ Route::middleware(['api'])
 
         Route::prefix('curations')->group(function () {
             Route::get('/', [CurationController::class, 'all']);
+            Route::get('/by-type', [CurationController::class, 'allByType']);
             Route::get('/{curation}', [CurationController::class, 'index']);
             Route::get('/{curation}/export', [CurationController::class, 'export']);
 

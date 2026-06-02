@@ -10,6 +10,7 @@ class SongEdit extends DefaultModelUuid
     {
         return [
             'release_date' => 'immutable_date',
+            'dismissed_errors' => 'array',
         ];
     }
 }

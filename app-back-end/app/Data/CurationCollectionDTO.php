@@ -10,9 +10,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 class CurationCollectionDTO extends Data
 {
     /**
-     * @param Collection<CurationDTO> $personal
-     * @param Collection<CurationDTO> $editorial
-     * @param Collection<CurationDTO> $era
+     * @param Collection<CurationSummaryDTO> $personal
+     * @param Collection<CurationSummaryDTO> $editorial
+     * @param Collection<CurationSummaryDTO> $era
      */
     public function __construct(
         public Collection $personal,

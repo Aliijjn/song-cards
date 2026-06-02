@@ -4,10 +4,10 @@ import dayjs from 'dayjs';
 import { ArrowRight, QrCode } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableEmpty, TableRow } from '@/components/ui/table';
-import CurationDTO = App.Data.CurationDTO;
 import { ref } from 'vue';
 import CurationAPI from '@/pages/curations/api.ts';
 import { Checkbox } from '@/components/ui/checkbox';
+import CurationSummaryDTO = App.Data.CurationSummaryDTO;
 
 const selected = defineModel<string[]>('selected', { default: null });
 const {
@@ -15,7 +15,7 @@ const {
   isLoading = false,
   showActions = false,
 } = defineProps<{
-  curations: CurationDTO[];
+  curations: CurationSummaryDTO[];
   search?: string;
   isLoading?: boolean;
   showActions?: boolean;
@@ -62,7 +62,7 @@ function toggle(curationId: string) {
           </div>
         </TableCell>
         <TableCell>
-          {{ curation.songs.length }} song{{ curation.songs.length === 1 ? '' : 's' }}
+          {{ curation.songCount }} song{{ curation.songCount === 1 ? '' : 's' }}
         </TableCell>
         <TableCell>
           {{ dayjs(curation.updatedAt).format('MMMM DD YYYY HH:mm') }}

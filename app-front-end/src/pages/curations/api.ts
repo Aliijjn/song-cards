@@ -7,12 +7,17 @@ import CurationCopyDTO = App.Data.CurationCopyDTO;
 import SongEditCreationDTO = App.Data.SongEditCreationDTO;
 import CurationCombineDTO = App.Data.CurationCombineDTO;
 import CurationCreationFromSongsDTO = App.Data.CurationCreationFromSongsDTO;
+import CurationSummaryDTO = App.Data.CurationSummaryDTO;
 
 export default class CurationAPI {
   private static readonly prefix = '/curations';
 
-  static getMultiple(): Promise<ApiResult<CurationCollectionDTO>> {
+  static all(): Promise<ApiResult<CurationSummaryDTO[]>> {
     return apiRequest(`${this.prefix}`, { method: 'GET' });
+  }
+
+  static allByType(): Promise<ApiResult<CurationCollectionDTO>> {
+    return apiRequest(`${this.prefix}/by-type`, { method: 'GET' });
   }
 
   static get(id: string): Promise<ApiResult<CurationDTO>> {

@@ -15,13 +15,8 @@ class SongsToErasService
 
         Curation::whereType(CurationTypeEnum::Era->value)->delete();
 
-        ray(Song::where('popularity', '>=', 75)
-            ->with('album')
-            ->get()
-            ->filter(fn(Song $song) => $song->album->release_date->year >= 1950)
-            ->groupBy(fn(Song $song) => (int)floor($song->album->release_date->year / 10) * 10));
-
-        Song::where('popularity', '>=', 75)
+        Song::where('popularity', '>=', 70)
+            ->where('errors', '=', '[]')
             ->with('album')
             ->get()
             ->filter(fn(Song $song) => $song->album->release_date->year >= 1950)

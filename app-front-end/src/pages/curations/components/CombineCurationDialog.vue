@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CurationCombineDTO = App.Data.CurationCombineDTO;
 import { onMounted, ref } from 'vue';
-import { Switch } from '@/components/ui/switch';
 import CurationTable from '@/pages/curations/components/CurationTable.vue';
-import CurationDTO = App.Data.CurationDTO;
 import CurationAPI from '@/pages/curations/api.ts';
 import { router } from '@/router.ts';
 import {
@@ -24,9 +15,8 @@ import {
   StepperTitle,
   StepperTrigger,
 } from '@/components/ui/stepper';
-import SelectPlaylists from '@/pages/cards/components/SelectPlaylists.vue';
 import { Label } from '@/components/ui/label';
-import SearchBar from '@/general/SearchBar.vue';
+import CurationSummaryDTO = App.Data.CurationSummaryDTO;
 
 const isOpen = defineModel<boolean>('isOpen');
 const { currentCurationId } = defineProps<{ currentCurationId: string }>();
@@ -39,11 +29,11 @@ const combine = ref<CurationCombineDTO>({
   keepOriginal: true,
   curationIds: [],
 });
-const curations = ref<CurationDTO[]>([]);
+const curations = ref<CurationSummaryDTO[]>([]);
 const isLoading = ref<boolean>(true);
 
 onMounted(async () => {
-  const response = await CurationAPI.getMultiple();
+  const response = await CurationAPI.all();
 
   if (response.status === 'success') {
     curations.value = response.value.filter((curation) => curation.id !== currentCurationId);

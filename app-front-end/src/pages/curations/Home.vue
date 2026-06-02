@@ -16,7 +16,7 @@ const search = ref('');
 const creatingNew = ref(false);
 
 onMounted(async () => {
-  const response = await CurationAPI.getMultiple();
+  const response = await CurationAPI.allByType();
   if (response.status === 'success') {
     personal.value = response.value.personal;
     editorial.value = response.value.editorial;
@@ -40,8 +40,18 @@ onMounted(async () => {
       </Button>
     </div>
 
-    <CurationCardRow :curations="personal" label="Your Curations" :search="search" :is-loading="isLoading" />
-    <CurationCardRow :curations="editorial" label="Editorial" :search="search" :is-loading="isLoading" />
+    <CurationCardRow
+      :curations="personal"
+      label="Your Curations"
+      :search="search"
+      :is-loading="isLoading"
+    />
+    <CurationCardRow
+      :curations="editorial"
+      label="Editorial"
+      :search="search"
+      :is-loading="isLoading"
+    />
     <CurationCardRow :curations="era" label="Eras" :search="search" :is-loading="isLoading" />
   </div>
 </template>

@@ -1,8 +1,8 @@
 declare namespace App.Data {
 export type CurationCollectionDTO = {
-personal: Array<CurationDTO>;
-editorial: Array<CurationDTO>;
-era: Array<CurationDTO>;
+personal: Array<any>;
+editorial: Array<any>;
+era: Array<any>;
 };
 export type CurationCombineDTO = {
 name: string;
@@ -37,6 +37,16 @@ createdBy: string;
 type: App.Enum.CurationTypeEnum;
 updatedAt: string;
 songs: Array<any>;
+coverUrl: string | null;
+};
+export type CurationSummaryDTO = {
+id: string;
+name: string;
+description: string | null;
+createdBy: string;
+type: App.Enum.CurationTypeEnum;
+updatedAt: string;
+songCount: number;
 coverUrl: string | null;
 };
 export type CurationUpdateDTO = {
@@ -94,6 +104,7 @@ export type SongEditCreationDTO = {
 song_id: string;
 name: string;
 release_date: string;
+dismissed_errors: Array<App.Enum.SongErrorEnum> | null;
 };
 }
 declare namespace App.Enum {

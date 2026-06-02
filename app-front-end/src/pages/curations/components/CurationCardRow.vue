@@ -5,7 +5,7 @@ import { router } from '@/router.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import CurationDTO = App.Data.CurationDTO;
+import CurationSummaryDTO = App.Data.CurationSummaryDTO;
 
 const ROW_SIZE = 4;
 
@@ -15,7 +15,7 @@ const {
   search = '',
   isLoading = false,
 } = defineProps<{
-  curations: CurationDTO[];
+  curations: CurationSummaryDTO[];
   label: string;
   search?: string;
   isLoading?: boolean;
@@ -73,7 +73,7 @@ const visible = computed(() =>
         <CardContent class="flex flex-col text-sm p-3">
           <span class="font-medium truncate">{{ curation.name }}</span>
           <span class="opaque"
-            >{{ curation.songs.length }} song{{ curation.songs.length === 1 ? '' : 's' }}</span
+            >{{ curation.songCount }} song{{ curation.songCount === 1 ? '' : 's' }}</span
           >
         </CardContent>
       </Card>

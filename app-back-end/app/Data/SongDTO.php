@@ -43,7 +43,9 @@ class SongDTO extends Data
             Image::getSmallestSquare(collect($song->album->images))?->url,
             $song->duration_ms / 1000,
             $songEdit?->release_date ?? $song->album->release_date,
-            collect($song->errors)
+            collect($song->errors)->reject(
+                fn($err) => in_array($err, $songEdit?->dismissed_errors ?? [])
+            )->values()
         );
     }
 

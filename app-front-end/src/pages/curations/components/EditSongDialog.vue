@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, computed } from 'vue';
+import { watch, computed, ref } from 'vue';
 import {
   Dialog,
   DialogClose,
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useCloned } from '@vueuse/core';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircleIcon, ChevronDownIcon } from 'lucide-vue-next';
+import { AlertCircleIcon, XIcon } from 'lucide-vue-next';
 import SongDTO = App.Data.SongDTO;
 import dayjs from 'dayjs';
 import { useDebounceFn } from '@vueuse/core';
@@ -28,9 +28,20 @@ const emit = defineEmits(['reload']);
 
 const { cloned: tempSong, sync } = useCloned(song, { manual: true });
 
-watch(isOpen, (nv) => nv && sync());
+const dismissedErrors = ref<number[]>([]);
 
-const errors = computed(() => song?.value?.errors?.map((err) => errorLookup.get(err)));
+watch(isOpen, (nv) => {
+  if (nv) {
+    sync();
+    dismissedErrors.value = [];
+  }
+});
+
+const errors = computed(() =>
+  song?.value?.errors
+    ?.filter((err) => !dismissedErrors.value.includes(err))
+    .map((err) => ({ code: err, message: errorLookup.get(err) }))
+);
 
 const errorLookup = new Map<number, string>([
   [1, 'Song is likely a rerelease. Release date may be inaccurate'],
@@ -52,6 +63,7 @@ async function apply() {
     song_id: song.value!.id,
     name: tempSong.value!.name,
     release_date: tempSong.value!.release_date,
+    dismissed_errors: dismissedErrors.value.length ? dismissedErrors.value : null,
   });
 
   if (response.status === 'success') {
@@ -73,8 +85,17 @@ async function apply() {
           <AlertCircleIcon />
           <AlertTitle>Potential issues with song card</AlertTitle>
           <AlertDescription>
-            <ul class="mt-2 list-inside list-disc space-y-1">
-              <li v-for="(err, i) in errors" :key="i">{{ err }}</li>
+            <ul class="mt-2 space-y-1">
+              <li v-for="err in errors" :key="err.code" class="flex items-center gap-2">
+                <span class="flex-1">{{ err.message }}</span>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:text-foreground"
+                  @click="dismissedErrors.push(err.code)"
+                >
+                  <XIcon class="size-3.5" />
+                </button>
+              </li>
             </ul>
           </AlertDescription>
         </Alert>

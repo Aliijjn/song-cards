@@ -9,6 +9,7 @@ use App\Data\CurationCreationDTO;
 use App\Data\CurationCreationFromSongsDTO;
 use App\Data\SongEditCreationDTO;
 use App\Data\CurationDTO;
+use App\Data\CurationSummaryDTO;
 use App\Data\CurationUpdateDTO;
 use App\Enum\CurationTypeEnum;
 use App\Models\Curation;
@@ -25,26 +26,31 @@ class CurationController extends Controller
 {
     public function all(): JsonResponse
     {
-        /**
-         * TODO: Spatie's data package loves RAM (reflection for each song)
-         * Either fix this or don't use spatie here
-         */
+        $curations = Curation::withCount('songs')
+            ->with(['songs' => fn($q) => $q->select('songs.id', 'songs.album_id')->with('album.images')])
+            ->get()
+            ->map(fn(Curation $curation) => CurationSummaryDTO::fromModel($curation))
+            ->values();
 
-        ini_set('memory_limit', '512M');
+        return new JsonResponse($curations);
+    }
 
-        $grouped = CurationDTO::collect(
-            Curation::with(['songs', 'songs.album.images', 'songEdits'])->get()
-        )
-            ->groupBy(fn(CurationDTO $curation) => $curation->type->value);
+    public function allByType(): JsonResponse
+    {
+        $grouped = Curation::withCount('songs')
+            ->with(['songs' => fn($q) => $q->select('songs.id', 'songs.album_id')->with('album.images')])
+            ->get()
+            ->map(fn(Curation $curation) => CurationSummaryDTO::fromModel($curation))
+            ->groupBy(fn(CurationSummaryDTO $curation) => $curation->type->value);
 
         $sorted = fn(?Collection $group) => ($group ?? collect())
-            ->sortByDesc(fn(CurationDTO $c) => $c->updatedAt)
+            ->sortByDesc(fn(CurationSummaryDTO $c) => $c->updatedAt)
             ->values();
 
         return new JsonResponse(new CurationCollectionDTO(
             $sorted($grouped[CurationTypeEnum::Personal->value] ?? null),
             $sorted($grouped[CurationTypeEnum::Editorial->value] ?? null),
-            ($grouped[CurationTypeEnum::Era->value] ?? collect())->sortBy(fn(CurationDTO $c) => $c->name)->values(),
+            ($grouped[CurationTypeEnum::Era->value] ?? collect())->sortBy(fn(CurationSummaryDTO $c) => $c->name)->values(),
         ));
     }
 
@@ -140,7 +146,16 @@ class CurationController extends Controller
         $creationDto = SongEditCreationDTO::from($request->get('songEdit'));
         $now = now();
 
-        SongEdit::upsert($creationDto->toArray(), ['song_id']);
+        $existing = SongEdit::whereSongId($creationDto->song_id)->first();
+        $mergedDismissed = array_values(array_unique(array_merge(
+            $existing?->dismissed_errors ?? [],
+            $creationDto->dismissed_errors?->toArray() ?? [],
+        )));
+
+        SongEdit::upsert([
+            ...$creationDto->toArray(),
+            'dismissed_errors' => json_encode($mergedDismissed),
+        ], ['song_id']);
 
         DB::table('curation_song_edit')->upsert([
             'curation_id' => $curation->id,
