@@ -12,7 +12,7 @@ use App\Data\CurationDTO;
 use App\Data\CurationUpdateDTO;
 use App\Enum\CurationTypeEnum;
 use App\Models\Curation;
-use App\Models\Export;
+use App\Services\GotenbergExportService;
 use App\Models\Song;
 use App\Models\SongEdit;
 use App\Services\SpotifyApiService;
@@ -82,14 +82,8 @@ class CurationController extends Controller
 
     public function export(Curation $curation): JsonResponse
     {
-        /**
-         * The Typst plugin for QR is insanely slow :))
-         *  Should probably use Gotenberg eventually
-         */
-        ini_set('max_execution_time', '12000');
-
         return new JsonResponse(
-            Export::fromCuration($curation)->id
+            GotenbergExportService::fromCuration($curation)->id
         );
     }
 

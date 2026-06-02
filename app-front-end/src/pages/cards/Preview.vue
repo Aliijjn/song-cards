@@ -26,9 +26,9 @@ function download() {
 
 <template>
   <breadcrumbs :breadcrumbs="breadcrumbs" />
-  <div class="gap-5 max-w-[900px] h-full flex flex-col">
+  <div class="gap-4 max-w-[900px] h-full flex flex-col">
     <div class="flex justify-between items-center">
-      <div class="text-3xl">Your Cards (PDF)</div>
+      <div class="text-2xl font-light">Your Cards (PDF)</div>
       <Button v-if="uuid" size="lg" @click="download">
         <Download />
         Download
@@ -39,7 +39,7 @@ function download() {
       <iframe
         v-else
         :src="`https://localhost:8001/storage/${uuid}.pdf`"
-        class="rounded-[0.75rem] border grow"
+        class="rounded-md border grow"
       />
     </div>
   </div>

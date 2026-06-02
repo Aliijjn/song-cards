@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { router } from '@/router.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import CurationDTO = App.Data.CurationDTO;
 
 const ROW_SIZE = 4;
@@ -35,9 +36,16 @@ const visible = computed(() =>
 
 <template>
   <div class="flex flex-col">
-    <span class="font-light text-2xl mb-1">{{ label }}</span>
+    <div class="flex flex-row items-center gap-3 mb-1">
+      <span class="font-light text-2xl whitespace-nowrap">{{ label }}</span>
+      <Separator class="flex-1" />
+    </div>
     <div v-if="isLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-      <Card v-for="i in ROW_SIZE" :key="i" class="rounded-md overflow-hidden p-0 gap-0 animate-pulse">
+      <Card
+        v-for="i in ROW_SIZE"
+        :key="i"
+        class="rounded-md overflow-hidden p-0 gap-0 animate-pulse"
+      >
         <div class="w-full aspect-square bg-muted" />
         <CardContent class="flex flex-col gap-2 p-3">
           <div class="h-3.5 w-3/4 rounded bg-muted" />

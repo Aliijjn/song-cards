@@ -22,10 +22,7 @@ class CurationSeeder extends Seeder
     {
         $apiService = new SpotifyApiService();
 
-        $playlists = $apiService->getPlaylists(collect(self::PLAYLIST_IDS));
-
-        ray($playlists);
-
+        $apiService->getPlaylists(collect(self::PLAYLIST_IDS));
         SongsToErasService::run();
     }
 }
