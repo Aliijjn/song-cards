@@ -50,8 +50,8 @@ export default class CurationAPI {
     return apiRequest(`${this.prefix}/${id}/combine`, { method: 'POST', body: { combine } });
   }
 
-  static toExport(id: string): Promise<ApiResult<string>> {
-    return apiRequest(`${this.prefix}/${id}/export`);
+  static toExport(id: string, skipErrors?: boolean): Promise<ApiResult<string>> {
+    return apiRequest(`${this.prefix}/${id}/export`, { query: { skip_errors: skipErrors } });
   }
 
   static delete(id: string): Promise<ApiResult<void>> {

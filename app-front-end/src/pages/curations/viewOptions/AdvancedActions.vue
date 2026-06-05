@@ -2,8 +2,9 @@
 import { Copy, Merge, Trash2, QrCode } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import ExportErrorDialog from '@/pages/curations/components/ExportErrorDialog.vue';
 import CopyCurationDialog from '@/pages/curations/components/CopyCurationDialog.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import CurationDTO = App.Data.CurationDTO;
 import CurationAPI from '@/pages/curations/api.ts';
 import { router } from '@/router.ts';
@@ -15,6 +16,11 @@ const isLoading = defineModel<boolean>('isLoading', { required: true });
 const isExporting = ref(false);
 const isCopyModalOpen = ref(false);
 const isCombineModalOpen = ref(false);
+const isExportDialogOpen = ref(false);
+
+const songsWithErrorCount = computed(
+  () => curation.value.songs.filter((s) => s.errors.length > 0).length
+);
 
 async function deleteCuration() {
   if (!curation.value) return;
@@ -26,13 +32,19 @@ async function deleteCuration() {
   }
 }
 
-async function runExport() {
-  isExporting.value = true;
-  const response = await CurationAPI.toExport(curation.value.id);
-  if (response.status === 'success') {
-    const exportId = response.value;
+function handleExportClick() {
+  if (songsWithErrorCount.value > 0) {
+    isExportDialogOpen.value = true;
+  } else {
+    runExport();
+  }
+}
 
-    router.push(`/cards/preview/${exportId}`);
+async function runExport(skipErrors?: boolean) {
+  isExporting.value = true;
+  const response = await CurationAPI.toExport(curation.value.id, skipErrors);
+  if (response.status === 'success') {
+    router.push(`/cards/preview/${response.value}`);
   }
   isExporting.value = false;
 }
@@ -42,19 +54,27 @@ async function runExport() {
   <CopyCurationDialog v-model:is-open="isCopyModalOpen" :curation="curation" />
   <CombineCurationDialog v-model:is-open="isCombineModalOpen" :current-curation-id="curation.id" />
 
+  <ExportErrorDialog
+    v-model:is-open="isExportDialogOpen"
+    :error-count="songsWithErrorCount"
+    @export="runExport"
+  />
+
   <div class="flex flex-col gap-9 mt-2">
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
-        <Label class="text-subtitle whitespace-nowrap">Export</Label>
+        <span class="text-subtitle whitespace-nowrap">Export</span>
         <Separator class="flex-1" />
       </div>
 
       <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label class="font-medium">Export To Song Cards</Label>
-          <span class="opaque">Turn this curation into a PDF you can print and cut out</span>
+          <span class="font-medium">Export To Song Cards</span>
+          <span class="text-muted-foreground"
+            >Turn this curation into a PDF you can print and cut out</span
+          >
         </div>
-        <Button size="lg" :disabled="isExporting" @click="runExport">
+        <Button size="lg" :disabled="isExporting" @click="handleExportClick">
           <QrCode />
           Export
         </Button>
@@ -63,14 +83,14 @@ async function runExport() {
 
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
-        <Label class="text-subtitle whitespace-nowrap">Actions</Label>
+        <span class="text-subtitle whitespace-nowrap">Actions</span>
         <Separator class="flex-1" />
       </div>
 
       <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label class="font-medium">Duplicate Curation</Label>
-          <span class="opaque">Create a copy of this curation</span>
+          <span class="font-medium">Duplicate Curation</span>
+          <span class="text-muted-foreground">Create a copy of this curation</span>
         </div>
         <Button size="lg" @click="isCopyModalOpen = true">
           <Copy />
@@ -80,8 +100,10 @@ async function runExport() {
 
       <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label class="font-medium">Combine With Other Curations</Label>
-          <span class="opaque">Combine this curation with multiple other curation</span>
+          <span class="font-medium">Combine With Other Curations</span>
+          <span class="text-muted-foreground"
+            >Combine this curation with multiple other curation</span
+          >
         </div>
         <Button size="lg" @click="isCombineModalOpen = true">
           <Merge />
@@ -92,14 +114,14 @@ async function runExport() {
 
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
-        <Label class="text-subtitle whitespace-nowrap">Danger Zone</Label>
+        <span class="text-subtitle whitespace-nowrap">Danger Zone</span>
         <Separator class="flex-1" />
       </div>
 
       <div class="flex justify-between items-center gap-9">
         <div class="flex flex-col">
-          <Label class="font-medium">Delete Curation</Label>
-          <span class="opaque">This action cannot be undone</span>
+          <span class="font-medium">Delete Curation</span>
+          <span class="text-muted-foreground">This action cannot be undone</span>
         </div>
         <Button variant="destructive" size="lg" @click="deleteCuration">
           <Trash2 />

@@ -15,11 +15,15 @@ use Ramsey\Uuid\Uuid;
 
 class GotenbergExportService
 {
-    public static function fromCuration(Curation $curation): Export
+    public static function fromCuration(Curation $curation, bool $skipErrors = false): Export
     {
         $curationDto = CurationDTO::fromModel($curation);
 
-        $chunks = $curationDto->songs
+        $songs = $skipErrors
+            ? $curationDto->songs->filter(fn(SongDTO $song) => $song->errors->isEmpty())
+            : $curationDto->songs;
+
+        $chunks = $songs
             ->map(fn(SongDTO $song) => [
                 'id'           => $song->id,
                 'name'         => $song->name,

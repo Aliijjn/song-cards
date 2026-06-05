@@ -110,13 +110,13 @@ async function apply() {
               </div>
             </template>
 
-            <template v-if="stepIndex === 2">
+            <div v-if="stepIndex === 2" class="max-h-[50vh] overflow-y-auto">
               <curation-table
                 v-model:selected="combine.curationIds"
                 :curations="curations"
                 :is-loading="isLoading"
               />
-            </template>
+            </div>
           </div>
 
           <div class="flex items-center justify-between mt-4">

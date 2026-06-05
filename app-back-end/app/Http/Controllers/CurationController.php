@@ -86,10 +86,10 @@ class CurationController extends Controller
         return new JsonResponse($curation->combine($combineDto)->id);
     }
 
-    public function export(Curation $curation): JsonResponse
+    public function export(Curation $curation, Request $request): JsonResponse
     {
         return new JsonResponse(
-            GotenbergExportService::fromCuration($curation)->id
+            GotenbergExportService::fromCuration($curation, $request->boolean('skip_errors'))->id
         );
     }
 
