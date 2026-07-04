@@ -1,34 +1,37 @@
 # Song Cards
+With this application, you can transform your Spotify playlists into your own song cards (inspired by the game Hitster)
+All you need is a Spotify account, a printer and a pair of scissors!
 
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/bd5a2c61-c329-45ce-a0ff-82c29af56411" />
-
+<img width="4080" height="2654" alt="IMG_20260606_230604432_1" src="https://github.com/user-attachments/assets/c893bbe9-de89-40d6-a627-4cdf4250cb30" />
 
 ## How the application works
 (note: background gradient doesn't work because Firefox)
-### 1. Make sure you're logged in through Spotify. Go to "Curations" in the top-right and click "Create Curation"
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/f44c3c73-f95a-4ae0-a1ba-162195873c1e" />
+> 1. Make sure you're logged in through Spotify. Go to "Curations" in the top-right and click "Create Curation"
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/f3cbc4dc-a8d7-4091-9709-7110b7711611" />
+
+> 2. Give your curation a name and select the playlists you want to include (can be multiple)
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/908fd1ff-04e0-467a-bd9b-c5c4130ed15d" />
+
+> 3. [Optional] Go to "Song Details" and check if the data is correct. You can edit a song by pressing the pencil. Spotify's API can be a bit of a mess with singles and rereleases
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/c59b9fc2-f745-44de-946f-2cc7bdb0cd4d" />
+
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/b8351e06-d92b-4334-a5a8-2221232113fa" />
+
+> 4. [Optional] Go to "Advanced Options". Here you can make copies of your curation and combine it with other curations
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/28cb5869-2b41-4007-b357-c64a89121961" />
+
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/83c600b6-1b56-4aa3-a2ff-a3ca6c61a40f" />
+
+> 5. In "Advanced Options", click on "Export" to export your curation to a PDF
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/0fdefc85-f8fd-46e7-ae34-3aa7d093807e" />
+
+> 6. Enjoy your cards!
+<img width="3420" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/c5a74118-3ca3-4794-9139-38b1ef20978f" />
+
+<img width="720" height="1811" alt="afbeelding" src="https://github.com/user-attachments/assets/b37abf07-2ef6-4ed9-9efb-10302ea1c89a" />
 
 
-### 2. Give your curation a name and select the playlists you want to include (can be multiple)
-<img width="3008" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/f62d3ea1-4ae8-44e3-bc85-25bc5b1e439c" />
 
-### 3. [Optional] Go to "Song Details" and check if the data is correct. You can edit a song by pressing the pencil. Spotify's API can be a bit of a mess with singles and rereleases
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/62f79898-1bec-41ff-ab63-569ae83020eb" />
-
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/ff58f40f-14a9-4453-b9e5-8b2913e517e1" />
-
-### 4. [Optional] Go to "Advanced Options". Here you can make copies of and combine curations
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/40f7abf8-1ded-4bab-b940-8a79b805aac3" />
-
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/a85aceec-1d58-4cd1-b283-ff8884eb595a" />
-
-
-### 5. In "Advanced Options", click on "Export" to export your curation to a PDF. Beware, this takes quite a while, especially if your curation is large (>100 songs)
-
-### 6. Enjoy your cards!
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/92247fa0-e4e9-4dc0-a895-3c7bad8563f0" />
-
-<img width="3418" height="1968" alt="afbeelding" src="https://github.com/user-attachments/assets/bd5a2c61-c329-45ce-a0ff-82c29af56411" />
 
 
 ## Setup
