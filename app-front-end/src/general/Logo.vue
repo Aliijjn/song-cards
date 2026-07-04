@@ -5,6 +5,6 @@ import { AudioLines } from 'lucide-vue-next';
 <template>
   <div class="flex gap-[4px] items-center">
     <AudioLines class="size-8 stroke-[2.2] text-primary" />
-    <Label class="text-[24px] pt-[3px] font-light"> Spoticards </Label>
+    <Label class="font-headline ml-[1px]"> Spoticards </Label>
   </div>
 </template>

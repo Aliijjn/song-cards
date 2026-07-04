@@ -13,7 +13,7 @@ const quote = getQuote(baseStore.prevScore);
   <div class="flex flex-col gap-8">
     <div>
       <div v-html="quote.quote" class="text-4xl" />
-      <div v-html="quote.info" class="text-2xl text-muted-foreground" />
+      <div v-html="quote.info" class="font-headline text-muted-foreground" />
     </div>
 
     <div class="text-muted-foreground text-xl">

@@ -24,7 +24,7 @@ const { breadcrumbs } = defineProps<{ breadcrumbs: Breadcrumb[] }>();
           <BreadcrumbLink class="text-base" href="/"> Home</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem v-for="(breadcrumb, i) in breadcrumbs" :key="i">
-          <BreadcrumbSeparator class="pb-0.5" />
+          <BreadcrumbSeparator class="pb-0.5 -mx-0.5" />
           <BreadcrumbLink class="text-base" v-if="breadcrumb.to" :href="breadcrumb.to ?? null">
             {{ breadcrumb.text }}
           </BreadcrumbLink>

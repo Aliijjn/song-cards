@@ -37,7 +37,7 @@ const visible = computed(() =>
 <template>
   <div class="flex flex-col">
     <div class="flex flex-row items-center gap-3 mb-1">
-      <span class="font-light text-2xl whitespace-nowrap">{{ label }}</span>
+      <span class="font-headline whitespace-nowrap">{{ label }}</span>
       <Separator class="flex-1" />
     </div>
     <div v-if="isLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -78,16 +78,18 @@ const visible = computed(() =>
         </CardContent>
       </Card>
     </div>
-    <Button
-      v-if="filtered.length > ROW_SIZE"
-      variant="ghost"
-      size="sm"
-      class="self-center mt-2"
-      @click="expanded = !expanded"
-    >
-      <ChevronUp v-if="expanded" />
-      <ChevronDown v-else />
-      {{ expanded ? 'Show less' : `Show ${filtered.length - ROW_SIZE} more` }}
-    </Button>
+    <div class="min-h-11">
+      <Button
+        v-if="filtered.length > ROW_SIZE"
+        variant="ghost"
+        size="sm"
+        class="mt-2"
+        @click="expanded = !expanded"
+      >
+        <ChevronUp v-if="expanded" />
+        <ChevronDown v-else />
+        {{ expanded ? 'Show less' : `Show ${filtered.length - ROW_SIZE} more` }}
+      </Button>
+    </div>
   </div>
 </template>

@@ -28,7 +28,7 @@ function download() {
   <breadcrumbs :breadcrumbs="breadcrumbs" />
   <div class="gap-4 max-w-[900px] h-full flex flex-col">
     <div class="flex justify-between items-center">
-      <div class="text-2xl font-light">Your Cards (PDF)</div>
+      <div class="font-headline">Your Cards (PDF)</div>
       <Button v-if="uuid" size="lg" @click="download">
         <Download />
         Download

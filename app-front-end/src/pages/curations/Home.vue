@@ -31,7 +31,7 @@ onMounted(async () => {
 
   <CreateCurationDialog v-model:is-open="creatingNew" />
 
-  <div class="flex flex-col gap-8 pb-5 max-w-[900px]">
+  <div class="flex flex-col gap-6 pb-10 max-w-[900px]">
     <div class="flex justify-between gap-2">
       <SearchBar v-model="search" size="lg" class="w-full" />
       <Button size="lg" @click="creatingNew = true">

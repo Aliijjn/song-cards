@@ -63,7 +63,7 @@ async function runExport(skipErrors?: boolean) {
   <div class="flex flex-col gap-9 mt-2">
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
-        <span class="text-subtitle whitespace-nowrap">Export</span>
+        <span class="font-headline whitespace-nowrap">Export</span>
         <Separator class="flex-1" />
       </div>
 
@@ -83,7 +83,7 @@ async function runExport(skipErrors?: boolean) {
 
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
-        <span class="text-subtitle whitespace-nowrap">Actions</span>
+        <span class="font-headline whitespace-nowrap">Actions</span>
         <Separator class="flex-1" />
       </div>
 
@@ -114,7 +114,7 @@ async function runExport(skipErrors?: boolean) {
 
     <div class="flex flex-col gap-3">
       <div class="flex gap-3 items-center">
-        <span class="text-subtitle whitespace-nowrap">Danger Zone</span>
+        <span class="font-headline whitespace-nowrap">Danger Zone</span>
         <Separator class="flex-1" />
       </div>
 

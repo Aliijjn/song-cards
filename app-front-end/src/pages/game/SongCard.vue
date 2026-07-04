@@ -29,12 +29,12 @@ const comparisonResult = computed(
   <Card class="p-0 gap-0 overflow-hidden">
     <div class="p-5 flex flex-row justify-between items-center">
       <div class="flex flex-col gap-1">
-        <div class="text-2xl">{{ selectedSong.name }}</div>
+        <div class="font-headline">{{ selectedSong.name }}</div>
         <div class="text-xl text-muted-foreground">{{ selectedSong.artist_name.join(', ') }}</div>
       </div>
       <div
           v-if="status !== 'idle'"
-          class="text-2xl"
+          class="font-headline"
           :class="[status === 'correct' ? 'text-green-500' : 'text-red-500']"
       >
         {{ comparisonResult }}

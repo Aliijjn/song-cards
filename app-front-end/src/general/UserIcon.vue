@@ -47,49 +47,49 @@ const colorOptions: ColorOption[] = [
 </script>
 
 <template>
-  <DropdownMenu>
-    <DropdownMenuTrigger as-child>
-      <div class="flex items-center">
-        <Button v-if="globalStore.isUserSpotifyTokenValid" variant="outline" size="icon-lg">
-          <User class="size-5 stroke-[1.2]" />
-        </Button>
-        <Button v-else>
-          <User />
-          Log In
-        </Button>
-      </div>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="start" class="w-45 mr-3">
-      <DropdownMenuGroup>
-        <DropdownMenuItem>
-          <div class="flex items-center !gap-1" @click="auth">
-            <Spinner v-if="globalStore.userSpotifyTokenValidity === null" size="6" />
-            <template v-else-if="globalStore.isUserSpotifyTokenValid">
-              <Check />
-              Logged in with Spotify
-            </template>
-            <template v-else>
-              <Key />
-              Log in through Spotify
-            </template>
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger data-sidebar="left"> Theme</DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem
-                v-for="option in colorOptions"
-                :key="option.value"
-                @click="mode = option.value"
-              >
-                <component :is="option.icon" />
-                {{ option.displayName }}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
-      </DropdownMenuGroup>
-    </DropdownMenuContent>
-  </DropdownMenu>
+  <div class="flex items-center gap-2">
+    <Button v-if="!globalStore.isUserSpotifyTokenValid"> Sign Up</Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger as-child>
+        <div class="flex items-center">
+          <Button v-if="globalStore.isUserSpotifyTokenValid" variant="outline" size="icon">
+            <User class="size-5 stroke-[1.2]" />
+          </Button>
+          <Button v-else variant="outline"> Log In</Button>
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" class="w-45 mr-3">
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <div class="flex items-center !gap-1" @click="auth">
+              <Spinner v-if="globalStore.userSpotifyTokenValidity === null" size="6" />
+              <template v-else-if="globalStore.isUserSpotifyTokenValid">
+                <Check />
+                Logged in with Spotify
+              </template>
+              <template v-else>
+                <Key />
+                Log in through Spotify
+              </template>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger data-sidebar="left"> Theme</DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem
+                  v-for="option in colorOptions"
+                  :key="option.value"
+                  @click="mode = option.value"
+                >
+                  <component :is="option.icon" />
+                  {{ option.displayName }}
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
 </template>

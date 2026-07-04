@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
                   :model-value="selectedSongIds.has(song.id)"
                   class="absolute"
                 />
-                <span v-else-if="song.order !== null" class="font-medium font-mono absolute">
+                <span v-else-if="song.order !== null" class="font-medium tnum absolute">
                   {{ song.order + 1 }}
                 </span>
               </div>

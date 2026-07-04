@@ -22,17 +22,20 @@ const tabs = [
 </script>
 
 <template>
-  <div class="flex justify-between items-center h-[60px] pl-3 pr-2">
-    <Logo />
+  <div class="h-15 shadow-blue-500">
+    <div class="grid grid-cols-3 items-center pl-3 p-2">
+      <Logo />
 
-    <div class="flex items-center gap-3">
-      <div class="flex gap-1">
+      <div class="flex justify-center items-center gap-1">
         <Button v-for="(tab, i) in tabs" :key="i" variant="ghost" @click="router.push(tab.to)">
           {{ tab.text }}
         </Button>
       </div>
-      <UserIcon />
+
+      <div class="flex justify-end">
+        <UserIcon />
+      </div>
     </div>
+    <Separator />
   </div>
-  <Separator />
 </template>
